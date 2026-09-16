@@ -1,0 +1,118 @@
+@startuml arquitectura
+title TrackFlow — Componentes, interfaces y flujo de eventos (Sprint 1)
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+left to right direction
+
+actor "Operador" as operador
+actor "Punto de la cadena\n(escáner, vehículo)" as punto
+actor "Cliente" as cliente
+
+queue "shipments.requests.queue" as qEnvios
+queue "logistics.events.queue" as qEventos
+database "PostgreSQL" as db
+
+package "Monolito TrackFlow" {
+
+  package "shared.events" #F5F5F5 {
+    interface EventPublisher
+    component "EnvioCreadoEvent" as e1
+    component "EventoLogisticoRegistradoEvent" as e2
+  }
+
+  package "modules.shipments" #E8F4FD {
+    component "ShipmentController" as shipCtrl
+    component "AdmitirEnvio" as admitirEnvio
+    component "RegistrarEnvio" as registrarEnvio
+    component "Shipment\n<<agregado>>" as shipAgg
+
+    interface ShipmentRepository
+    interface EnvioSolicitadoPublisher
+    interface TrackingNumberGenerator
+
+    component "RabbitMQEnvioSolicitadoListener" as shipListener
+    component "JpaShipmentRepository" as shipJpa
+    component "RabbitMQEnvioSolicitadoPublisher" as shipPub
+  }
+
+  package "modules.logistics" #FFF4E5 {
+    component "LogisticsEventController" as logCtrl
+    component "AdmitirEventoLogistico" as admitirEvento
+    component "RegistrarEventoLogistico" as registrarEvento
+    component "LogisticsEvent\n<<entidad>>" as logEnt
+
+    interface LogisticsEventRepository
+    interface TrackedShipmentRepository
+    interface EventoLogisticoPublisher
+
+    component "RabbitMQEventoLogisticoListener" as logListener
+    component "JpaLogisticsEventRepository" as logJpa
+    component "RabbitMQEventoLogisticoPublisher" as logPub
+  }
+
+  package "modules.reports" #EAF7EA {
+    component "ConsultaEnvioController" as repCtrl
+    component "ConsultarEstadoEnvio" as consultar
+    component "ProyectarSeguimientoEnvio" as proyectar
+    component "ShipmentTrackingView\n<<modelo de lectura>>" as vista
+
+    interface ShipmentTrackingViewRepository
+    component "JpaShipmentTrackingViewRepository" as repJpa
+  }
+}
+
+' --- Ingesta: el REST publica, no escribe ---
+operador --> shipCtrl : POST /api/shipments\n(202)
+shipCtrl --> admitirEnvio
+admitirEnvio ..> EnvioSolicitadoPublisher
+shipPub ..|> EnvioSolicitadoPublisher
+shipPub --> qEnvios : publica
+qEnvios --> shipListener : consume
+shipListener --> registrarEnvio
+registrarEnvio --> shipAgg
+
+operador --> logCtrl : POST /…/events\n(202)
+punto --> qEventos : publica directamente
+logCtrl --> admitirEvento
+admitirEvento ..> EventoLogisticoPublisher
+logPub ..|> EventoLogisticoPublisher
+logPub --> qEventos : publica
+qEventos --> logListener : consume
+logListener --> registrarEvento
+registrarEvento --> logEnt
+
+' --- Persistencia por puertos ---
+registrarEnvio ..> ShipmentRepository
+shipJpa ..|> ShipmentRepository
+admitirEnvio ..> TrackingNumberGenerator
+registrarEvento ..> LogisticsEventRepository
+logJpa ..|> LogisticsEventRepository
+admitirEvento ..> TrackedShipmentRepository
+consultar ..> ShipmentTrackingViewRepository
+repJpa ..|> ShipmentTrackingViewRepository
+
+shipJpa --> db
+logJpa --> db
+repJpa --> db
+
+' --- Integración entre módulos: solo por eventos ---
+registrarEnvio ..> EventPublisher : publica e1
+registrarEvento ..> EventPublisher : publica e2
+e1 ..> logListener
+e1 ..> proyectar
+e2 ..> registrarEnvio
+e2 ..> proyectar
+proyectar --> vista
+
+' --- Consulta ---
+cliente --> repCtrl : GET /api/tracking/{n}
+repCtrl --> consultar
+
+note bottom
+  **Ninguna petición HTTP escribe en la base de datos.**
+  Los controladores validan y publican; los listeners registran.
+  Los módulos no se importan entre sí: solo dependen de shared.events.
+end note
+
+@enduml

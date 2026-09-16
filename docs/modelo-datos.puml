@@ -1,0 +1,92 @@
+@startuml modelo-datos
+title TrackFlow — Modelo de datos por módulo (Sprint 1)
+
+hide circle
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+package "modules.shipments" #E8F4FD {
+  entity "shipments" as shipments {
+    * id : bigserial <<PK>>
+    --
+    * tracking_number : varchar <<unique>>
+    --
+    ' Party del remitente (objeto embebido)
+    * sender_full_name : varchar
+    * sender_document_id : varchar
+    * sender_phone : varchar
+    * sender_address : varchar
+    * sender_city : varchar
+    --
+    ' Party del destinatario (objeto embebido)
+    * recipient_full_name : varchar
+    * recipient_document_id : varchar
+    * recipient_phone : varchar
+    * recipient_address : varchar
+    * recipient_city : varchar
+    --
+    * description : varchar
+    * status : varchar <<enum>>
+    * registered_at : timestamptz
+    last_movement_point : varchar
+    last_movement_at : timestamptz
+  }
+}
+
+package "modules.logistics" #FFF4E5 {
+  entity "logistics_events" as eventos {
+    * id : bigserial <<PK>>
+    --
+    * event_id : varchar <<unique>>
+    * tracking_number : varchar
+    * type : varchar <<enum>>
+    * point : varchar
+    notes : varchar
+    * registered_at : timestamptz
+  }
+
+  entity "logistics_tracked_shipments" as conocidos {
+    * tracking_number : varchar <<PK>>
+    --
+    * registered_at : timestamptz
+  }
+}
+
+package "modules.reports" #EAF7EA {
+  entity "reports_shipment_tracking" as vista {
+    * tracking_number : varchar <<PK>>
+    --
+    * status : varchar
+    * recipient_name : varchar
+    * destination_city : varchar
+    * registered_at : timestamptz
+    last_movement_point : varchar
+    last_movement_at : timestamptz
+  }
+}
+
+' Correlación lógica por número de seguimiento: NO hay claves foráneas
+shipments ||..o{ eventos : "tracking_number\n(sin FK)"
+shipments ||..|| conocidos : "tracking_number\n(sin FK)"
+shipments ||..|| vista : "tracking_number\n(sin FK)"
+
+note bottom of conocidos
+  Se llena al consumir **EnvioCreadoEvent**.
+  Permite validar que un envío existe sin
+  leer la tabla de otro módulo.
+end note
+
+note bottom of vista
+  Modelo de lectura de HU-03.
+  Lo construyen **EnvioCreadoEvent** y
+  **EventoLogisticoRegistradoEvent**.
+end note
+
+note top of shipments
+  Cada módulo es dueño de sus tablas.
+  La correlación es por identificador de negocio,
+  no por integridad referencial: así un módulo
+  podría mudarse a otra base sin cambiar el modelo.
+end note
+
+@enduml
