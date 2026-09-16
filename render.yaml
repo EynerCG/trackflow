@@ -6,10 +6,22 @@ services:
     region: oregon
     healthCheckPath: /actuator/health
     envVars:
-      # Los tres valores se definen en el dashboard de Render, nunca en este archivo.
+      # Todos estos valores se definen en el dashboard de Render, nunca en este archivo.
       - key: TRACKFLOW_DB_URL
         sync: false
       - key: TRACKFLOW_DB_USER
         sync: false
       - key: TRACKFLOW_DB_PASSWORD
         sync: false
+      - key: RABBITMQ_HOST
+        sync: false
+      - key: RABBITMQ_USER
+        sync: false
+      - key: RABBITMQ_PASSWORD
+        sync: false
+      - key: RABBITMQ_VHOST
+        sync: false
+      - key: RABBITMQ_PORT
+        value: "5671"
+      - key: RABBITMQ_SSL
+        value: "true"
