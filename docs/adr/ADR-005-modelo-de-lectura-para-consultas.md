@@ -50,9 +50,18 @@ Se adopta la alternativa **C**.
 - El estado del envío queda duplicado: en `shipments` (agregado) y en `reports` (vista).
 - Consistencia eventual: la proyección se actualiza tras el commit del evento, con un desfase de
   milisegundos.
-- Si un evento de proyección falla, la vista queda desincronizada de forma permanente y no hay
-  mecanismo de reconstrucción. **Es la deuda más relevante de esta decisión**: haría falta poder
-  reconstruir la proyección desde el historial de eventos.
+- Si un evento de proyección falla, la vista queda desincronizada y el fallo es silencioso: nada
+  avisa de que los datos divergieron.
+
+**Mitigación**
+
+`POST /api/admin/reconstruir-proyecciones` rehace las proyecciones desde la fuente de verdad.
+Cada módulo republica sus propios eventos —primero las altas de envíos, después los movimientos
+en orden cronológico— y los suscriptores reconstruyen sus tablas reaccionando, sin que ningún
+módulo lea las tablas de otro.
+
+Queda pendiente **detectar** la divergencia: hoy la reconstrucción se dispara a mano porque nada
+la señala.
 
 **Nota sobre el nombre**
 

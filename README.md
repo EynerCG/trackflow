@@ -16,6 +16,9 @@ Proyecto de Fábrica Escuela (CodeF@ctory UdeA 2026-2) — Sprint 1.
 | HU-02 | Registrar un evento logístico de un envío | `POST /api/shipments/{trackingNumber}/events` |
 | HU-03 | Consultar el estado actual de un envío | `GET /api/tracking/{trackingNumber}` |
 
+La consulta es pública; registrar exige un token de operador que se obtiene en
+`POST /api/auth/login`.
+
 ## Arquitectura en una frase
 
 Monolito modular con Clean Architecture dentro de cada módulo, donde **toda la información
@@ -49,6 +52,7 @@ springdoc-openapi · Maven · Docker
 | [3. Instalación de RabbitMQ](docs/3-instalacion-rabbitmq.md) | Broker en local y gestionado |
 | [4. Ejecución](docs/4-ejecucion.md) | Cómo levantar y probar el proyecto |
 | [5. Modelo de datos](docs/5-modelo-datos.md) | Tablas por módulo y por qué no hay claves foráneas |
+| [6. Guía de pruebas](docs/6-guia-de-pruebas.md) | Qué probar y cómo, teniendo en cuenta la asincronía |
 | [ADR](docs/adr/) | Decisiones de arquitectura registradas |
 
 ## Arranque rápido

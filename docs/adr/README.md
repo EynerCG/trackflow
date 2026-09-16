@@ -10,6 +10,8 @@ primeras condicionan a las siguientes.
 | [ADR-003](ADR-003-eventos-de-integracion-compartidos.md) | Eventos de integración en `shared/events` | Aceptada |
 | [ADR-004](ADR-004-puertos-y-adaptadores.md) | Puertos en `application`, adaptadores en `infrastructure` | Aceptada |
 | [ADR-005](ADR-005-modelo-de-lectura-para-consultas.md) | Modelo de lectura propio para la consulta de estado | Aceptada |
+| [ADR-006](ADR-006-flyway-para-el-esquema.md) | Flyway como dueño del esquema de base de datos | Aceptada |
+| [ADR-007](ADR-007-autenticacion-con-jwt.md) | Autenticación de operadores con JWT | Aceptada |
 
 Cada ADR registra contexto, alternativas consideradas, decisión, consecuencias, responsable y
 fecha. Un ADR no se edita cuando cambia de opinión el equipo: se escribe uno nuevo que

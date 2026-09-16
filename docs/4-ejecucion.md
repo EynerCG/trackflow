@@ -61,6 +61,36 @@ $env:TRACKFLOW_DB_PASSWORD="contraseña"
 | `RABBITMQ_VHOST` | `/` | Virtual host |
 | `RABBITMQ_SSL` | `false` | TLS, obligatorio en brokers gestionados |
 | `trackflow.seed.enabled` | `false` | Carga los datos semilla al arrancar |
+| `TRACKFLOW_OPERADOR_USUARIO` | `operador` | Usuario que puede escribir |
+| `TRACKFLOW_OPERADOR_CLAVE` | *(vacía)* | Su clave. **Vacía desactiva la protección** |
+| `TRACKFLOW_ADMIN_USUARIO` | `admin` | Usuario con permisos de mantenimiento |
+| `TRACKFLOW_ADMIN_CLAVE` | *(vacía)* | Su clave. Vacía deja `/api/admin/**` inaccesible |
+| `TRACKFLOW_JWT_SECRET` | *(generado)* | Secreto de firma, mínimo 32 caracteres |
+| `TRACKFLOW_TOKEN_MINUTOS` | `60` | Vigencia del token |
+
+## Autenticación
+
+Hay dos roles y un acceso público:
+
+| Quién | Puede |
+|---|---|
+| Cualquiera, sin token | Consultar el estado de un envío y su historial |
+| `OPERADOR` | Además, registrar envíos y eventos |
+| `ADMIN` | Además, reconstruir proyecciones (`/api/admin/**`) |
+
+La consulta es pública a propósito: el número de seguimiento es la credencial del cliente.
+
+En local, si no se define `TRACKFLOW_OPERADOR_CLAVE`, la protección queda desactivada y todo
+funciona sin token. El arranque lo advierte en el log. Con la clave definida:
+
+```bash
+POST /api/auth/login
+{ "usuario": "operador", "clave": "la-clave-configurada" }
+```
+
+Devuelve un token que se envía en cada petición de escritura como
+`Authorization: Bearer <token>`. En Swagger se registra una vez con el botón **Authorize** y
+queda aplicado a todas las llamadas.
 
 ## Datos semilla
 

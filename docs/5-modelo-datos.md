@@ -83,8 +83,14 @@ gana autonomía y consultas directas, se paga con datos repetidos que se sincron
 
 ## Creación del esquema
 
-Hoy lo genera Hibernate con `spring.jpa.hibernate.ddl-auto=update`, lo que es cómodo para el
-sprint pero deja el esquema sin historial ni control de versiones.
+El esquema lo gobierna **Flyway**, con migraciones versionadas en
+`src/main/resources/db/migration`. Hibernate está en `ddl-auto=validate`: verifica al arrancar
+que las entidades coincidan con las tablas, pero no modifica nada.
 
-**Recomendación para el siguiente sprint:** migrar a Flyway con scripts versionados, para que
-el esquema sea reproducible y auditable.
+Esto significa que **cada cambio en una entidad necesita su migración**. Si se olvida, la
+aplicación no arranca y el log indica qué no coincide.
+
+Las bases creadas antes de adoptar Flyway se marcan como línea base
+(`spring.flyway.baseline-on-migrate=true`) en lugar de intentar recrear sus tablas.
+
+Ver [ADR-006](adr/ADR-006-flyway-para-el-esquema.md).

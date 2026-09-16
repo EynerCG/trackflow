@@ -64,7 +64,8 @@ pruebas y sustentación, y porque cualquier otro sistema puede publicar en la mi
 - Los mensajes que no se pueden procesar necesitan destino: se configuraron colas de descarte
   (DLQ) por flujo.
 
-**Pendiente**
+**Seguimiento**
 
-Nadie lee las colas de descarte todavía. Hace falta un proceso o alerta que las vigile, o los
-mensajes rechazados se acumularán en silencio.
+Las colas de descarte tienen un consumidor que registra cada mensaje rechazado en el log con
+nivel `ERROR`, con su `eventId` y su número de seguimiento. Queda pendiente poder reprocesarlos
+desde la aplicación una vez corregida la causa; hoy hay que republicarlos a mano.

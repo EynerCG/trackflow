@@ -54,8 +54,10 @@ ejemplo, `ShipmentRepository` (puerto) y `JpaShipmentRepository` (adaptador), o
 - Más archivos: por cada repositorio hay una interfaz, un adaptador y la interfaz de Spring Data.
 - Para quien no conoce el patrón, la indirección puede parecer innecesaria al principio.
 
-**Excepción conocida**
+**Seguimiento**
 
-`LogisticsEventController` inyecta directamente el puerto `LogisticsEventRepository` para
-devolver el historial, saltándose un caso de uso. Funciona y respeta la regla de dependencia,
-pero es inconsistente con el resto: esa consulta debería tener su propio caso de uso.
+`LogisticsEventController` inyectaba el repositorio directamente para devolver el historial,
+saltándose la capa de casos de uso. Se corrigió con `ConsultarHistorial`, y el arreglo destapó
+un defecto que la inconsistencia escondía: al no pasar por un caso de uso, nadie comprobaba que
+el envío existiera, así que un número inexistente devolvía una lista vacía con 200 en lugar de
+404 — indistinguible de un envío sin movimientos.

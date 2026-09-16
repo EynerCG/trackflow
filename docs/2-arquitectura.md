@@ -134,6 +134,21 @@ El estado inicial de todo envío es `REGISTERED`.
 
 Se visualizan con la extensión PlantUML de VS Code (Alt+D).
 
+## Seguridad
+
+La escritura exige un token JWT de operador; la consulta de estado es pública, porque el número
+de seguimiento es la credencial del cliente. Sin credenciales configuradas la protección se
+desactiva, para no entorpecer el entorno local ni las pruebas. Ver
+[ADR-007](adr/ADR-007-autenticacion-con-jwt.md).
+
+## Operación
+
+- **Colas de descarte:** cada mensaje rechazado queda registrado en el log con nivel `ERROR`.
+- **Reconstrucción:** `POST /api/admin/reconstruir-proyecciones` rehace las proyecciones
+  republicando los eventos desde la fuente de verdad, sin que ningún módulo lea tablas ajenas.
+- **Esquema:** lo gobierna Flyway; Hibernate solo valida. Ver
+  [ADR-006](adr/ADR-006-flyway-para-el-esquema.md).
+
 ## Consecuencias asumidas
 
 **Consistencia eventual.** Entre el `202` y el registro efectivo pasan milisegundos. Una prueba
