@@ -25,6 +25,11 @@ public class JpaLogisticsEventRepository implements LogisticsEventRepository {
     }
 
     @Override
+    public List<LogisticsEvent> findTodosCronologicamente() {
+        return jpa.findAllByOrderByRegisteredAtAsc();
+    }
+
+    @Override
     public boolean existePorEventId(String eventId) {
         return jpa.existsByEventId(eventId);
     }

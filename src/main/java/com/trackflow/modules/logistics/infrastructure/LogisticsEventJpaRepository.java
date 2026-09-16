@@ -9,4 +9,6 @@ public interface LogisticsEventJpaRepository extends JpaRepository<LogisticsEven
     List<LogisticsEvent> findByTrackingNumberOrderByRegisteredAtAsc(String trackingNumber);
 
     boolean existsByEventId(String eventId);
+
+    List<LogisticsEvent> findAllByOrderByRegisteredAtAsc();
 }

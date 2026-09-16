@@ -3,6 +3,7 @@ package com.trackflow.modules.shipments.infrastructure;
 import com.trackflow.modules.shipments.application.ShipmentRepository;
 import com.trackflow.modules.shipments.domain.Shipment;
 import com.trackflow.modules.shipments.domain.TrackingNumber;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +19,11 @@ public class JpaShipmentRepository implements ShipmentRepository {
     @Override
     public Shipment save(Shipment shipment) {
         return jpa.save(shipment);
+    }
+
+    @Override
+    public List<Shipment> findAll() {
+        return jpa.findAll();
     }
 
     @Override

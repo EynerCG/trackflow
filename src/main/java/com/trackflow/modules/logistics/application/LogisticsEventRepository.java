@@ -9,5 +9,7 @@ public interface LogisticsEventRepository {
 
     List<LogisticsEvent> findHistorial(String trackingNumber);
 
+    List<LogisticsEvent> findTodosCronologicamente();
+
     boolean existePorEventId(String eventId);
 }

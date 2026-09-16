@@ -4,8 +4,8 @@ import com.trackflow.modules.logistics.api.dto.EventoAdmitidoResponse;
 import com.trackflow.modules.logistics.api.dto.EventoLogisticoResponse;
 import com.trackflow.modules.logistics.api.dto.RegistrarEventoRequest;
 import com.trackflow.modules.logistics.application.AdmitirEventoLogistico;
+import com.trackflow.modules.logistics.application.ConsultarHistorial;
 import com.trackflow.modules.logistics.application.EventoLogisticoEntrante;
-import com.trackflow.modules.logistics.application.LogisticsEventRepository;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -26,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class LogisticsEventController {
 
     private final AdmitirEventoLogistico admitirEventoLogistico;
-    private final LogisticsEventRepository logisticsEvents;
+    private final ConsultarHistorial consultarHistorial;
 
     public LogisticsEventController(AdmitirEventoLogistico admitirEventoLogistico,
-            LogisticsEventRepository logisticsEvents) {
+            ConsultarHistorial consultarHistorial) {
         this.admitirEventoLogistico = admitirEventoLogistico;
-        this.logisticsEvents = logisticsEvents;
+        this.consultarHistorial = consultarHistorial;
     }
 
     @PostMapping
@@ -48,7 +48,7 @@ public class LogisticsEventController {
 
     @GetMapping
     public List<EventoLogisticoResponse> historial(@PathVariable String trackingNumber) {
-        return logisticsEvents.findHistorial(trackingNumber).stream()
+        return consultarHistorial.ejecutar(trackingNumber).stream()
                 .map(EventoLogisticoResponse::from)
                 .toList();
     }
