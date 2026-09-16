@@ -1,20 +1,21 @@
 package com.trackflow.modules.logistics.application;
 
-import com.trackflow.modules.logistics.domain.EventType;
 import com.trackflow.modules.logistics.domain.LogisticsEvent;
 import com.trackflow.modules.logistics.domain.UnknownShipmentException;
 import com.trackflow.shared.events.EventPublisher;
 import com.trackflow.shared.events.EventoLogisticoRegistradoEvent;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegistrarEventoLogistico {
 
-    public record Command(String trackingNumber, EventType tipo, String punto, String observaciones) {
-    }
+    private static final Logger log = LoggerFactory.getLogger(RegistrarEventoLogistico.class);
 
     private final LogisticsEventRepository logisticsEvents;
     private final TrackedShipmentRepository trackedShipments;
@@ -29,18 +30,28 @@ public class RegistrarEventoLogistico {
         this.clock = clock;
     }
 
+    /**
+     * El broker entrega at-least-once, así que un mismo eventId puede llegar más de una vez;
+     * la segunda se descarta en lugar de duplicar el movimiento en el historial.
+     */
     @Transactional
-    public LogisticsEvent ejecutar(Command command) {
-        if (!trackedShipments.exists(command.trackingNumber())) {
-            throw new UnknownShipmentException(command.trackingNumber());
+    public Optional<LogisticsEvent> ejecutar(EventoLogisticoEntrante entrante) {
+        if (logisticsEvents.existePorEventId(entrante.eventId())) {
+            log.info("Evento {} ya registrado, se descarta la reentrega", entrante.eventId());
+            return Optional.empty();
+        }
+
+        if (!trackedShipments.exists(entrante.trackingNumber())) {
+            throw new UnknownShipmentException(entrante.trackingNumber());
         }
 
         Instant now = clock.instant();
         LogisticsEvent saved = logisticsEvents.save(LogisticsEvent.registrar(
-                command.trackingNumber(),
-                command.tipo(),
-                command.punto(),
-                command.observaciones(),
+                entrante.eventId(),
+                entrante.trackingNumber(),
+                entrante.tipo(),
+                entrante.punto(),
+                entrante.observaciones(),
                 now));
 
         events.publish(new EventoLogisticoRegistradoEvent(
@@ -52,6 +63,6 @@ public class RegistrarEventoLogistico {
                 saved.getRegisteredAt(),
                 now));
 
-        return saved;
+        return Optional.of(saved);
     }
 }

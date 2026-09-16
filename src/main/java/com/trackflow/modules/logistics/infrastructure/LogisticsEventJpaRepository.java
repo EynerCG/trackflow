@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LogisticsEventJpaRepository extends JpaRepository<LogisticsEvent, Long> {
 
     List<LogisticsEvent> findByTrackingNumberOrderByRegisteredAtAsc(String trackingNumber);
+
+    boolean existsByEventId(String eventId);
 }

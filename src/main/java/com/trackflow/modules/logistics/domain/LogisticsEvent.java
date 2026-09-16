@@ -18,6 +18,10 @@ public class LogisticsEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Identificador del mensaje de ingesta. Unico para descartar reentregas del broker. */
+    @Column(nullable = false, unique = true, updatable = false)
+    private String eventId;
+
     @Column(nullable = false, updatable = false)
     private String trackingNumber;
 
@@ -36,7 +40,9 @@ public class LogisticsEvent {
     protected LogisticsEvent() {
     }
 
-    private LogisticsEvent(String trackingNumber, EventType type, String point, String notes, Instant registeredAt) {
+    private LogisticsEvent(String eventId, String trackingNumber, EventType type, String point, String notes,
+            Instant registeredAt) {
+        this.eventId = eventId;
         this.trackingNumber = trackingNumber;
         this.type = type;
         this.point = point;
@@ -44,13 +50,17 @@ public class LogisticsEvent {
         this.registeredAt = registeredAt;
     }
 
-    public static LogisticsEvent registrar(String trackingNumber, EventType type, String point, String notes,
-            Instant registeredAt) {
-        return new LogisticsEvent(trackingNumber, type, point, notes, registeredAt);
+    public static LogisticsEvent registrar(String eventId, String trackingNumber, EventType type, String point,
+            String notes, Instant registeredAt) {
+        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, registeredAt);
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getEventId() {
+        return eventId;
     }
 
     public String getTrackingNumber() {

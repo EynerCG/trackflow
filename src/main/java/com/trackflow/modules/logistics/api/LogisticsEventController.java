@@ -1,10 +1,11 @@
 package com.trackflow.modules.logistics.api;
 
+import com.trackflow.modules.logistics.api.dto.EventoAdmitidoResponse;
 import com.trackflow.modules.logistics.api.dto.EventoLogisticoResponse;
 import com.trackflow.modules.logistics.api.dto.RegistrarEventoRequest;
+import com.trackflow.modules.logistics.application.AdmitirEventoLogistico;
+import com.trackflow.modules.logistics.application.EventoLogisticoEntrante;
 import com.trackflow.modules.logistics.application.LogisticsEventRepository;
-import com.trackflow.modules.logistics.application.RegistrarEventoLogistico;
-import com.trackflow.modules.logistics.domain.LogisticsEvent;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -16,29 +17,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Adaptador de entrada REST. No registra el evento: lo admite y lo publica en el broker,
+ * igual que haría cualquier punto de la cadena. Quien registra es el consumidor de la cola.
+ */
 @RestController
 @RequestMapping("/api/shipments/{trackingNumber}/events")
 public class LogisticsEventController {
 
-    private final RegistrarEventoLogistico registrarEventoLogistico;
+    private final AdmitirEventoLogistico admitirEventoLogistico;
     private final LogisticsEventRepository logisticsEvents;
 
-    public LogisticsEventController(RegistrarEventoLogistico registrarEventoLogistico,
+    public LogisticsEventController(AdmitirEventoLogistico admitirEventoLogistico,
             LogisticsEventRepository logisticsEvents) {
-        this.registrarEventoLogistico = registrarEventoLogistico;
+        this.admitirEventoLogistico = admitirEventoLogistico;
         this.logisticsEvents = logisticsEvents;
     }
 
     @PostMapping
-    public ResponseEntity<EventoLogisticoResponse> registrar(@PathVariable String trackingNumber,
+    public ResponseEntity<EventoAdmitidoResponse> admitir(@PathVariable String trackingNumber,
             @Valid @RequestBody RegistrarEventoRequest request) {
-        LogisticsEvent event = registrarEventoLogistico.ejecutar(new RegistrarEventoLogistico.Command(
+        EventoLogisticoEntrante evento = admitirEventoLogistico.ejecutar(new AdmitirEventoLogistico.Command(
                 trackingNumber,
                 request.tipo(),
                 request.punto(),
                 request.observaciones()));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(EventoLogisticoResponse.from(event));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(EventoAdmitidoResponse.from(evento));
     }
 
     @GetMapping

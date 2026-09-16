@@ -1,44 +1,52 @@
 package com.trackflow.modules.shipments.application;
 
-import com.trackflow.modules.shipments.domain.Party;
 import com.trackflow.modules.shipments.domain.Shipment;
+import com.trackflow.modules.shipments.domain.TrackingNumber;
 import com.trackflow.shared.events.EnvioCreadoEvent;
 import com.trackflow.shared.events.EventPublisher;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegistrarEnvio {
 
-    public record Command(Party remitente, Party destinatario, String descripcion) {
-    }
+    private static final Logger log = LoggerFactory.getLogger(RegistrarEnvio.class);
 
     private final ShipmentRepository shipments;
-    private final TrackingNumberGenerator trackingNumbers;
     private final EventPublisher events;
     private final Clock clock;
 
-    public RegistrarEnvio(ShipmentRepository shipments, TrackingNumberGenerator trackingNumbers, EventPublisher events,
-            Clock clock) {
+    public RegistrarEnvio(ShipmentRepository shipments, EventPublisher events, Clock clock) {
         this.shipments = shipments;
-        this.trackingNumbers = trackingNumbers;
         this.events = events;
         this.clock = clock;
     }
 
+    /**
+     * El broker entrega at-least-once: si la solicitud llega repetida, el número de
+     * seguimiento ya existe y se descarta en lugar de registrar el envío dos veces.
+     */
     @Transactional
-    public Shipment ejecutar(Command command) {
-        Instant now = clock.instant();
-        Shipment shipment = Shipment.registrar(
-                trackingNumbers.next(),
-                command.remitente(),
-                command.destinatario(),
-                command.descripcion(),
-                now);
+    public Optional<Shipment> ejecutar(EnvioSolicitado solicitud) {
+        TrackingNumber trackingNumber = TrackingNumber.of(solicitud.trackingNumber());
 
-        Shipment saved = shipments.save(shipment);
+        if (shipments.existsByTrackingNumber(trackingNumber)) {
+            log.info("Envío {} ya registrado, se descarta la reentrega", solicitud.trackingNumber());
+            return Optional.empty();
+        }
+
+        Instant now = clock.instant();
+        Shipment saved = shipments.save(Shipment.registrar(
+                trackingNumber,
+                solicitud.remitente(),
+                solicitud.destinatario(),
+                solicitud.descripcion(),
+                now));
 
         events.publish(new EnvioCreadoEvent(
                 saved.getTrackingNumber().value(),
@@ -48,6 +56,6 @@ public class RegistrarEnvio {
                 saved.getRegisteredAt(),
                 now));
 
-        return saved;
+        return Optional.of(saved);
     }
 }

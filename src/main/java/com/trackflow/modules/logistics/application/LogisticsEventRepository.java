@@ -8,4 +8,6 @@ public interface LogisticsEventRepository {
     LogisticsEvent save(LogisticsEvent event);
 
     List<LogisticsEvent> findHistorial(String trackingNumber);
+
+    boolean existePorEventId(String eventId);
 }

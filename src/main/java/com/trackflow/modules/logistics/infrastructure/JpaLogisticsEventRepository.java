@@ -23,4 +23,9 @@ public class JpaLogisticsEventRepository implements LogisticsEventRepository {
     public List<LogisticsEvent> findHistorial(String trackingNumber) {
         return jpa.findByTrackingNumberOrderByRegisteredAtAsc(trackingNumber);
     }
+
+    @Override
+    public boolean existePorEventId(String eventId) {
+        return jpa.existsByEventId(eventId);
+    }
 }
