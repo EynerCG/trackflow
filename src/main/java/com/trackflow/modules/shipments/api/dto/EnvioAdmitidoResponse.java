@@ -16,7 +16,7 @@ public record EnvioAdmitidoResponse(
                 solicitud.trackingNumber(),
                 solicitud.eventId(),
                 solicitud.destinatario().getFullName(),
-                solicitud.destinatario().getCity(),
+                solicitud.ciudadDestino().etiqueta(),
                 solicitud.solicitadoEn(),
                 "ENCOLADO");
     }

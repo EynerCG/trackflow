@@ -30,7 +30,8 @@ com.trackflow
 │   └── reports/                      ← HU-03
 │       └── (misma estructura)
 └── shared/
-    └── events/                       ← contrato de integración entre módulos
+    ├── events/                       ← contrato de integración entre módulos
+    └── geografia/                    ← catálogo de ciudades (dato de referencia)
 ```
 
 ### La regla de dependencia
@@ -60,6 +61,7 @@ base, o RabbitMQ por otro broker, no toca los casos de uso.
 | `EventoLogisticoPublisher` | logistics | `RabbitMQEventoLogisticoPublisher` |
 | `ShipmentTrackingViewRepository` | reports | `JpaShipmentTrackingViewRepository` |
 | `EventPublisher` | shared | `SpringEventPublisher` |
+| `CatalogoDeCiudades` | shared | `CatalogoDeCiudadesJpa` |
 
 ## Los tres módulos
 
@@ -74,7 +76,9 @@ poder validar que un envío existe sin consultar las tablas de `shipments`.
 **`reports`** responde las consultas. Mantiene `ShipmentTrackingView`, un modelo de lectura
 que se construye escuchando los eventos de los otros dos módulos.
 
-**Ningún módulo importa clases de otro.** Solo dependen de `shared/events`.
+**Ningún módulo importa clases de otro.** Solo dependen de `shared`: de `events` para el contrato
+de integración y de `geografia` para el catálogo de ciudades, que es dato de referencia del que
+ningún módulo de negocio es dueño ([ADR-010](adr/ADR-010-catalogo-de-ciudades.md)).
 
 ## Los dos planos de eventos
 

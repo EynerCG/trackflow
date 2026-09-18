@@ -87,6 +87,8 @@ decisiones **están tomadas en el código pero no han sido validadas con el due�
 | Pregunta abierta | Supuesto aplicado |
 |---|---|
 | ¿Qué datos del remitente y destinatario son obligatorios? | Todos: nombre, tipo y número de documento, teléfono, dirección y ciudad |
+| ¿De dónde sale la ciudad? | De un catálogo; se envía su id, no el nombre ([ADR-010](adr/ADR-010-catalogo-de-ciudades.md)) |
+| ¿Quién fija la fecha de un movimiento? | La reporta el punto de la cadena; si no la envía, se asume el momento de recepción ([ADR-009](adr/ADR-009-fecha-de-ocurrencia-del-movimiento.md)) |
 | ¿Qué documentos se admiten? | `CC`, `CE`, `TI`, `PP` y `NIT`, cada uno con su formato validado ([ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md)) |
 | ¿Qué formato tiene el número de seguimiento? | `TF` + 12 caracteres alfanuméricos en mayúscula |
 | ¿Cuál es el estado inicial de un envío? | `REGISTERED` |

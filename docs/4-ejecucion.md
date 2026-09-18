@@ -112,6 +112,19 @@ La carga es idempotente: si los envíos ya están, no se duplican.
 La forma más cómoda es la documentación interactiva: http://localhost:8080 redirige a
 Swagger UI.
 
+### Buscar la ciudad
+
+La ciudad no se escribe: se escoge del catálogo. `GET /api/ciudades?q=bogo` devuelve hasta diez
+coincidencias, las que empiezan por el texto primero.
+
+```json
+[
+  { "id": 10, "nombre": "BOGOTÁ", "departamento": "CUNDINAMARCA", "etiqueta": "BOGOTÁ - CUNDINAMARCA" }
+]
+```
+
+Ese `id` es el que se envía al registrar el envío, para origen y para destino.
+
 ### Registrar un envío (HU-01)
 
 `POST /api/shipments`
@@ -124,7 +137,7 @@ Swagger UI.
     "numeroDocumento": "1017254893",
     "telefono": "3001234567",
     "direccion": "Calle 10 #20-30",
-    "ciudad": "Medellín"
+    "ciudadId": 1
   },
   "destinatario": {
     "nombreCompleto": "Distribuciones del Norte S.A.S.",
@@ -132,7 +145,7 @@ Swagger UI.
     "numeroDocumento": "890903938-8",
     "telefono": "3007654321",
     "direccion": "Carrera 7 #40-50",
-    "ciudad": "Bogotá"
+    "ciudadId": 10
   },
   "descripcion": "Caja de repuestos"
 }
@@ -150,7 +163,8 @@ Responde `202 Accepted` con el número de seguimiento. Si falta un campo obligat
 | `PP` | entre 5 y 15 caracteres, letras mayúsculas y dígitos |
 | `NIT` | 9 o 10 dígitos; si trae dígito de verificación (`890903938-8`) se comprueba con las ponderaciones de la DIAN |
 
-Un número que no corresponde al tipo responde `400` explicando el formato esperado.
+Un número que no corresponde al tipo responde `400` explicando el formato esperado. Una
+`ciudadId` que no está en el catálogo también responde `400`.
 
 ### Registrar un evento (HU-02)
 

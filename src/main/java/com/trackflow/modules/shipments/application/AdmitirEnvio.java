@@ -2,6 +2,8 @@ package com.trackflow.modules.shipments.application;
 
 import com.trackflow.modules.shipments.domain.Party;
 import com.trackflow.modules.shipments.domain.TrackingNumber;
+import com.trackflow.shared.geografia.CatalogoDeCiudades;
+import com.trackflow.shared.geografia.Ciudad;
 import java.time.Clock;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -14,32 +16,53 @@ import org.springframework.stereotype.Service;
 @Service
 public class AdmitirEnvio {
 
-    public record Command(Party remitente, Party destinatario, String descripcion) {
+    public record Command(DatosPersona remitente, DatosPersona destinatario, String descripcion) {
     }
 
     private final TrackingNumberGenerator trackingNumbers;
     private final EnvioSolicitadoPublisher publisher;
+    private final CatalogoDeCiudades ciudades;
     private final Clock clock;
 
-    public AdmitirEnvio(TrackingNumberGenerator trackingNumbers, EnvioSolicitadoPublisher publisher, Clock clock) {
+    public AdmitirEnvio(TrackingNumberGenerator trackingNumbers, EnvioSolicitadoPublisher publisher,
+            CatalogoDeCiudades ciudades, Clock clock) {
         this.trackingNumbers = trackingNumbers;
         this.publisher = publisher;
+        this.ciudades = ciudades;
         this.clock = clock;
     }
 
+    /**
+     * Las ciudades se resuelven aquí, antes de encolar: una ciudad inexistente se
+     * rechaza de inmediato con un 400 en lugar de acabar en la cola de descartados.
+     */
     public EnvioSolicitado ejecutar(Command command) {
+        Ciudad ciudadRemitente = ciudades.exigir(command.remitente().ciudadId());
+        Ciudad ciudadDestino = ciudades.exigir(command.destinatario().ciudadId());
+
         TrackingNumber trackingNumber = trackingNumbers.next();
 
         EnvioSolicitado solicitud = new EnvioSolicitado(
                 UUID.randomUUID().toString(),
                 trackingNumber.value(),
-                command.remitente(),
-                command.destinatario(),
+                aParty(command.remitente(), ciudadRemitente),
+                aParty(command.destinatario(), ciudadDestino),
+                ciudadDestino,
                 command.descripcion(),
                 clock.instant());
 
         publisher.publicar(solicitud);
 
         return solicitud;
+    }
+
+    private Party aParty(DatosPersona datos, Ciudad ciudad) {
+        return new Party(
+                datos.nombreCompleto(),
+                datos.tipoDocumento(),
+                datos.numeroDocumento(),
+                datos.telefono(),
+                datos.direccion(),
+                ciudad.id());
     }
 }

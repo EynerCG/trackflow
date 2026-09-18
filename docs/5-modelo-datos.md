@@ -1,6 +1,6 @@
 # 5. Modelo de datos
 
-Cuatro tablas, una sola base de datos, y **ninguna clave foránea entre módulos**.
+Cinco tablas, una sola base de datos, y **ninguna clave foránea entre módulos**.
 
 El diagrama está en [`modelo-datos.puml`](modelo-datos.puml).
 
@@ -12,8 +12,10 @@ El agregado principal. Una fila por envío.
 |---|---|---|
 | `id` | bigserial | PK |
 | `tracking_number` | varchar | **único**, identificador de negocio |
-| `sender_full_name`, `sender_document_type`, `sender_document_number`, `sender_phone`, `sender_address`, `sender_city` | varchar | remitente |
-| `recipient_full_name`, `recipient_document_type`, `recipient_document_number`, `recipient_phone`, `recipient_address`, `recipient_city` | varchar | destinatario |
+| `sender_full_name`, `sender_document_type`, `sender_document_number`, `sender_phone`, `sender_address` | varchar | remitente |
+| `sender_city_id` | bigint | **FK** a `cities` |
+| `recipient_full_name`, `recipient_document_type`, `recipient_document_number`, `recipient_phone`, `recipient_address` | varchar | destinatario |
+| `recipient_city_id` | bigint | **FK** a `cities` |
 | `description` | varchar | descripción del paquete |
 | `status` | varchar | estado actual del envío |
 | `registered_at` | timestamptz | |
@@ -27,6 +29,24 @@ El documento son **dos columnas**, no una. `*_document_type` guarda el tipo (`CC
 tipo es el que decide cómo se valida el número, así que juntarlos en un solo texto impedía
 validar y también contar cuántos envíos los despacha una empresa (`NIT`) frente a una persona
 natural. Ver [ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md).
+
+La ciudad tampoco es texto: es una referencia al catálogo. El envío guarda solo el identificador,
+porque repetir aquí el nombre y el departamento sería una dependencia transitiva. Ver
+[ADR-010](adr/ADR-010-catalogo-de-ciudades.md).
+
+## `cities` — catálogo compartido
+
+Los municipios entre los que se puede despachar. Los carga la migración; la aplicación solo los
+lee.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | bigserial | PK |
+| `name`, `department` | varchar | **únicos como pareja** |
+
+No pertenece a ningún módulo: es dato de referencia que usan `shipments` (origen y destino) y
+`reports` (la etiqueta que ve el cliente). Vive en `shared/geografia` por la misma razón que los
+eventos de integración viven en `shared/events`.
 
 ## `logistics_events` — módulo logistics
 
@@ -67,7 +87,8 @@ El modelo de lectura de HU-03. Lo construyen los dos eventos de integración.
 | `tracking_number` | varchar, PK |
 | `status` | varchar |
 | `recipient_name` | varchar |
-| `destination_city` | varchar |
+| `destination_city_id` | bigint |
+| `destination_city` | varchar (la etiqueta: "BOGOTÁ - CUNDINAMARCA") |
 | `registered_at` | timestamptz |
 | `last_movement_point`, `last_movement_at` | varchar, timestamptz |
 
@@ -84,6 +105,9 @@ mañana `logistics` se extrae a un microservicio con su propia base, el modelo n
 
 El precio es que la integridad referencial no la garantiza el motor, sino el flujo de eventos y
 la validación de los casos de uso.
+
+Sí hay claves foráneas hacia `cities`, y no contradicen la regla: esta protege de acoplar dos
+módulos de negocio, y el catálogo no es uno. Es dato de referencia compartido.
 
 ### Hay duplicación, y es intencional
 

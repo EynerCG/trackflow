@@ -6,6 +6,7 @@ import java.time.Instant;
 public record EstadoEnvioResponse(
         String trackingNumber,
         String estado,
+        Long ciudadDestinoId,
         String ciudadDestino,
         Instant registeredAt,
         boolean tieneMovimientos,
@@ -16,6 +17,7 @@ public record EstadoEnvioResponse(
         return new EstadoEnvioResponse(
                 view.getTrackingNumber(),
                 view.getStatus(),
+                view.getDestinationCityId(),
                 view.getDestinationCity(),
                 view.getRegisteredAt(),
                 view.tieneMovimientos(),

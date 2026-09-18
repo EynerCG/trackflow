@@ -1,6 +1,7 @@
 package com.trackflow.modules.shipments.api;
 
 import com.trackflow.modules.shipments.domain.DocumentoInvalidoException;
+import com.trackflow.shared.geografia.CiudadDesconocidaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +18,13 @@ public class ShipmentsExceptionHandler {
     ProblemDetail documentoInvalido(DocumentoInvalidoException e) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
         problema.setTitle("Documento de identidad inválido");
+        return problema;
+    }
+
+    @ExceptionHandler(CiudadDesconocidaException.class)
+    ProblemDetail ciudadDesconocida(CiudadDesconocidaException e) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        problema.setTitle("Ciudad no encontrada en el catálogo");
         return problema;
     }
 }

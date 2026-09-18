@@ -17,7 +17,7 @@ package "modules.shipments" #E8F4FD {
     * sender_document_number : varchar
     * sender_phone : varchar
     * sender_address : varchar
-    * sender_city : varchar
+    * sender_city_id : bigint <<FK>>
     --
     ' Party del destinatario (objeto embebido)
     * recipient_full_name : varchar
@@ -25,13 +25,24 @@ package "modules.shipments" #E8F4FD {
     * recipient_document_number : varchar
     * recipient_phone : varchar
     * recipient_address : varchar
-    * recipient_city : varchar
+    * recipient_city_id : bigint <<FK>>
     --
     * description : varchar
     * status : varchar <<enum>>
     * registered_at : timestamptz
     last_movement_point : varchar
     last_movement_at : timestamptz
+  }
+}
+
+package "shared.geografia" #F3EAF7 {
+  entity "cities" as ciudades {
+    * id : bigserial <<PK>>
+    --
+    * name : varchar
+    * department : varchar
+    --
+    unique (name, department)
   }
 }
 
@@ -61,12 +72,16 @@ package "modules.reports" #EAF7EA {
     --
     * status : varchar
     * recipient_name : varchar
+    * destination_city_id : bigint
     * destination_city : varchar
     * registered_at : timestamptz
     last_movement_point : varchar
     last_movement_at : timestamptz
   }
 }
+
+' Dato de referencia compartido: aquí SÍ hay clave foránea
+ciudades ||--o{ shipments : "origen y destino\n(FK)"
 
 ' Correlación lógica por número de seguimiento: NO hay claves foráneas
 shipments ||..o{ eventos : "tracking_number\n(sin FK)"
@@ -90,6 +105,12 @@ note top of shipments
   La correlación es por identificador de negocio,
   no por integridad referencial: así un módulo
   podría mudarse a otra base sin cambiar el modelo.
+end note
+
+note right of ciudades
+  Catálogo compartido: ningún módulo es su dueño.
+  La regla de "sin FK" protege de acoplar dos módulos
+  de negocio, y este no es uno.
 end note
 
 @enduml

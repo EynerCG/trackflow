@@ -30,8 +30,8 @@ public class ShipmentController {
     @PostMapping
     public ResponseEntity<EnvioAdmitidoResponse> admitir(@Valid @RequestBody RegistrarEnvioRequest request) {
         EnvioSolicitado solicitud = admitirEnvio.ejecutar(new AdmitirEnvio.Command(
-                request.remitente().toDomain(),
-                request.destinatario().toDomain(),
+                request.remitente().toDatos(),
+                request.destinatario().toDatos(),
                 request.descripcion()));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(EnvioAdmitidoResponse.from(solicitud));

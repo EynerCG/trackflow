@@ -22,6 +22,14 @@ public class ShipmentTrackingView {
     @Column(nullable = false)
     private String recipientName;
 
+    /** Identificador de la ciudad en el catálogo, para agrupar por destino. */
+    @Column(nullable = false)
+    private Long destinationCityId;
+
+    /**
+     * La etiqueta que ve el cliente ("MEDELLÍN - ANTIOQUIA"). Aquí la duplicación es
+     * intencional: es lo que permite responder la consulta sin unir tablas.
+     */
     @Column(nullable = false)
     private String destinationCity;
 
@@ -35,11 +43,12 @@ public class ShipmentTrackingView {
     protected ShipmentTrackingView() {
     }
 
-    public ShipmentTrackingView(String trackingNumber, String status, String recipientName, String destinationCity,
-            Instant registeredAt) {
+    public ShipmentTrackingView(String trackingNumber, String status, String recipientName, Long destinationCityId,
+            String destinationCity, Instant registeredAt) {
         this.trackingNumber = trackingNumber;
         this.status = status;
         this.recipientName = recipientName;
+        this.destinationCityId = destinationCityId;
         this.destinationCity = destinationCity;
         this.registeredAt = registeredAt;
     }
@@ -77,6 +86,10 @@ public class ShipmentTrackingView {
 
     public String getRecipientName() {
         return recipientName;
+    }
+
+    public Long getDestinationCityId() {
+        return destinationCityId;
     }
 
     public String getDestinationCity() {

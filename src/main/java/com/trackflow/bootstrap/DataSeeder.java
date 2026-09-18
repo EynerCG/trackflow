@@ -9,6 +9,8 @@ import com.trackflow.modules.shipments.application.ShipmentRepository;
 import com.trackflow.modules.shipments.domain.Party;
 import com.trackflow.modules.shipments.domain.TipoDocumento;
 import com.trackflow.modules.shipments.domain.TrackingNumber;
+import com.trackflow.shared.geografia.CatalogoDeCiudades;
+import com.trackflow.shared.geografia.Ciudad;
 import java.time.Clock;
 import java.time.Duration;
 import org.slf4j.Logger;
@@ -42,13 +44,15 @@ public class DataSeeder implements ApplicationRunner {
     private final EnvioSolicitadoPublisher envios;
     private final EventoLogisticoPublisher eventos;
     private final ShipmentRepository shipments;
+    private final CatalogoDeCiudades ciudades;
     private final Clock clock;
 
     public DataSeeder(EnvioSolicitadoPublisher envios, EventoLogisticoPublisher eventos, ShipmentRepository shipments,
-            Clock clock) {
+            CatalogoDeCiudades ciudades, Clock clock) {
         this.envios = envios;
         this.eventos = eventos;
         this.shipments = shipments;
+        this.ciudades = ciudades;
         this.clock = clock;
     }
 
@@ -80,15 +84,28 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     private void solicitarEnvio(String trackingNumber, String descripcion) {
+        // Se buscan por nombre y no por identificador fijo: los ids del catálogo los
+        // asigna la migración y no son parte de su contrato.
+        Ciudad origen = buscarCiudad("MEDELLÍN");
+        Ciudad destino = buscarCiudad("BOGOTÁ");
+
         envios.publicar(new EnvioSolicitado(
                 "seed-env-" + trackingNumber,
                 trackingNumber,
                 new Party("Ana Remitente", TipoDocumento.CC, "1017254893", "3001112233", "Calle 10 #20-30",
-                        "Medellín"),
+                        origen.id()),
                 new Party("Beto Destinatario", TipoDocumento.CC, "79546218", "3004445566", "Carrera 7 #40-50",
-                        "Bogotá"),
+                        destino.id()),
+                destino,
                 descripcion,
                 clock.instant()));
+    }
+
+    private Ciudad buscarCiudad(String nombre) {
+        return ciudades.buscar(nombre, 1).stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "El catálogo de ciudades no tiene '%s'; revise la migración V4".formatted(nombre)));
     }
 
     private void publicarEvento(String eventId, String trackingNumber, EventType tipo, String punto) {

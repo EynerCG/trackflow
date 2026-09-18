@@ -3,6 +3,8 @@ package com.trackflow.modules.shipments.application;
 import com.trackflow.modules.shipments.domain.Shipment;
 import com.trackflow.shared.events.EnvioCreadoEvent;
 import com.trackflow.shared.events.EventPublisher;
+import com.trackflow.shared.geografia.CatalogoDeCiudades;
+import com.trackflow.shared.geografia.Ciudad;
 import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
@@ -21,11 +23,14 @@ public class RepublicarEnviosCreados {
 
     private final ShipmentRepository shipments;
     private final EventPublisher events;
+    private final CatalogoDeCiudades ciudades;
     private final Clock clock;
 
-    public RepublicarEnviosCreados(ShipmentRepository shipments, EventPublisher events, Clock clock) {
+    public RepublicarEnviosCreados(ShipmentRepository shipments, EventPublisher events,
+            CatalogoDeCiudades ciudades, Clock clock) {
         this.shipments = shipments;
         this.events = events;
+        this.ciudades = ciudades;
         this.clock = clock;
     }
 
@@ -34,11 +39,14 @@ public class RepublicarEnviosCreados {
         List<Shipment> todos = shipments.findAll();
 
         for (Shipment shipment : todos) {
+            Ciudad ciudadDestino = ciudades.exigir(shipment.getRecipient().getCityId());
+
             events.publish(new EnvioCreadoEvent(
                     shipment.getTrackingNumber().value(),
                     shipment.getStatus().name(),
                     shipment.getRecipient().getFullName(),
-                    shipment.getRecipient().getCity(),
+                    ciudadDestino.id(),
+                    ciudadDestino.etiqueta(),
                     shipment.getRegisteredAt(),
                     clock.instant()));
         }

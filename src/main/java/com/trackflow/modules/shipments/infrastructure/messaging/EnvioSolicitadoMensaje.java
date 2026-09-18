@@ -3,6 +3,7 @@ package com.trackflow.modules.shipments.infrastructure.messaging;
 import com.trackflow.modules.shipments.application.EnvioSolicitado;
 import com.trackflow.modules.shipments.domain.Party;
 import com.trackflow.modules.shipments.domain.TipoDocumento;
+import com.trackflow.shared.geografia.Ciudad;
 import java.time.Instant;
 
 /**
@@ -13,6 +14,7 @@ public record EnvioSolicitadoMensaje(
         String trackingNumber,
         PersonaMensaje remitente,
         PersonaMensaje destinatario,
+        CiudadMensaje ciudadDestino,
         String descripcion,
         Instant solicitadoEn) {
 
@@ -22,7 +24,7 @@ public record EnvioSolicitadoMensaje(
             String numeroDocumento,
             String telefono,
             String direccion,
-            String ciudad) {
+            Long ciudadId) {
 
         static PersonaMensaje from(Party party) {
             return new PersonaMensaje(
@@ -31,12 +33,23 @@ public record EnvioSolicitadoMensaje(
                     party.getDocumentNumber(),
                     party.getPhone(),
                     party.getAddress(),
-                    party.getCity());
+                    party.getCityId());
         }
 
         Party toDomain() {
             return new Party(nombreCompleto, TipoDocumento.valueOf(tipoDocumento), numeroDocumento,
-                    telefono, direccion, ciudad);
+                    telefono, direccion, ciudadId);
+        }
+    }
+
+    public record CiudadMensaje(Long id, String nombre, String departamento) {
+
+        static CiudadMensaje from(Ciudad ciudad) {
+            return new CiudadMensaje(ciudad.id(), ciudad.nombre(), ciudad.departamento());
+        }
+
+        Ciudad toDomain() {
+            return new Ciudad(id, nombre, departamento);
         }
     }
 
@@ -46,6 +59,7 @@ public record EnvioSolicitadoMensaje(
                 solicitud.trackingNumber(),
                 PersonaMensaje.from(solicitud.remitente()),
                 PersonaMensaje.from(solicitud.destinatario()),
+                CiudadMensaje.from(solicitud.ciudadDestino()),
                 solicitud.descripcion(),
                 solicitud.solicitadoEn());
     }
@@ -56,6 +70,7 @@ public record EnvioSolicitadoMensaje(
                 trackingNumber,
                 remitente.toDomain(),
                 destinatario.toDomain(),
+                ciudadDestino.toDomain(),
                 descripcion,
                 solicitadoEn);
     }

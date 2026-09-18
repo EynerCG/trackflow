@@ -31,7 +31,7 @@ public class Shipment {
             @AttributeOverride(name = "documentNumber", column = @Column(name = "sender_document_number", nullable = false)),
             @AttributeOverride(name = "phone", column = @Column(name = "sender_phone", nullable = false)),
             @AttributeOverride(name = "address", column = @Column(name = "sender_address", nullable = false)),
-            @AttributeOverride(name = "city", column = @Column(name = "sender_city", nullable = false))
+            @AttributeOverride(name = "cityId", column = @Column(name = "sender_city_id", nullable = false))
     })
     private Party sender;
 
@@ -42,7 +42,7 @@ public class Shipment {
             @AttributeOverride(name = "documentNumber", column = @Column(name = "recipient_document_number", nullable = false)),
             @AttributeOverride(name = "phone", column = @Column(name = "recipient_phone", nullable = false)),
             @AttributeOverride(name = "address", column = @Column(name = "recipient_address", nullable = false)),
-            @AttributeOverride(name = "city", column = @Column(name = "recipient_city", nullable = false))
+            @AttributeOverride(name = "cityId", column = @Column(name = "recipient_city_id", nullable = false))
     })
     private Party recipient;
 

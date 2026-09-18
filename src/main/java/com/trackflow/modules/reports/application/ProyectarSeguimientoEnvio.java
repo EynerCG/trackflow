@@ -22,6 +22,7 @@ public class ProyectarSeguimientoEnvio {
                 event.trackingNumber(),
                 event.status(),
                 event.recipientName(),
+                event.destinationCityId(),
                 event.destinationCity(),
                 event.registeredAt()));
     }

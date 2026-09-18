@@ -52,7 +52,8 @@ public class RegistrarEnvio {
                 saved.getTrackingNumber().value(),
                 saved.getStatus().name(),
                 saved.getRecipient().getFullName(),
-                saved.getRecipient().getCity(),
+                solicitud.ciudadDestino().id(),
+                solicitud.ciudadDestino().etiqueta(),
                 saved.getRegisteredAt(),
                 now));
 

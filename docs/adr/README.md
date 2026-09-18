@@ -14,6 +14,7 @@ primeras condicionan a las siguientes.
 | [ADR-007](ADR-007-autenticacion-con-jwt.md) | Autenticación de operadores con JWT | Aceptada |
 | [ADR-008](ADR-008-tipo-y-numero-de-documento.md) | El documento se guarda como tipo y número | Aceptada |
 | [ADR-009](ADR-009-fecha-de-ocurrencia-del-movimiento.md) | El movimiento guarda cuándo ocurrió, no solo cuándo se reportó | Aceptada |
+| [ADR-010](ADR-010-catalogo-de-ciudades.md) | La ciudad sale de un catálogo, no de un campo de texto | Aceptada |
 
 Cada ADR registra contexto, alternativas consideradas, decisión, consecuencias, responsable y
 fecha. Un ADR no se edita cuando cambia de opinión el equipo: se escribe uno nuevo que

@@ -24,14 +24,18 @@ public class Party {
     @Column(nullable = false)
     private String address;
 
+    /**
+     * Identificador de la ciudad en el catálogo. Se guarda solo el identificador: el
+     * nombre y el departamento viven en el catálogo, y repetirlos aquí rompería 3NF.
+     */
     @Column(nullable = false)
-    private String city;
+    private Long cityId;
 
     protected Party() {
     }
 
     public Party(String fullName, TipoDocumento documentType, String documentNumber,
-            String phone, String address, String city) {
+            String phone, String address, Long cityId) {
         String numero = documentNumber == null ? null : documentNumber.trim().toUpperCase();
         if (documentType == null || !documentType.aceptaNumero(numero)) {
             throw new DocumentoInvalidoException(documentType, documentNumber);
@@ -42,7 +46,7 @@ public class Party {
         this.documentNumber = numero;
         this.phone = phone;
         this.address = address;
-        this.city = city;
+        this.cityId = cityId;
     }
 
     public String getFullName() {
@@ -65,7 +69,7 @@ public class Party {
         return address;
     }
 
-    public String getCity() {
-        return city;
+    public Long getCityId() {
+        return cityId;
     }
 }
