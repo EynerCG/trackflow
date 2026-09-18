@@ -17,6 +17,16 @@ Para las pruebas de aceptación hay que esperar a que el efecto ocurra, con rein
 tiempo límite, en lugar de comprobar de inmediato. Por ejemplo, consultar el estado cada 200 ms
 hasta que cambie, con un máximo de unos segundos.
 
+## Lo segundo: el documento cambió de forma
+
+`documento` ya no existe. En su lugar van **dos campos**: `tipoDocumento` (`CC`, `CE`, `TI`,
+`PP` o `NIT`) y `numeroDocumento`. Una petición con el formato anterior responde `400`.
+
+El número se valida contra el tipo, así que `{"tipoDocumento": "CC", "numeroDocumento": "1001"}`
+también responde `400`: una cédula son entre 6 y 10 dígitos. Los formatos están en
+[4. Ejecución](4-ejecucion.md) y el porqué en
+[ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md).
+
 ## Qué conviene probar, por nivel
 
 ### Pruebas unitarias (sin base de datos ni broker)
@@ -29,6 +39,8 @@ Son las de las tareas 77, 79 y 81. Se prueban los casos de uso con dobles de los
 | Un `trackingNumber` repetido no registra dos veces el envío | `RegistrarEnvio` | Misma razón, en el flujo de altas |
 | Cada tipo de evento lleva al estado correcto | `EventType` | Es la regla de negocio central de HU-02 |
 | Se rechazan los formatos inválidos | `TrackingNumber` | El value object es quien garantiza el formato |
+| Cada tipo de documento acepta su formato y rechaza los demás | `TipoDocumento` | Incluye el dígito de verificación del NIT |
+| Un documento inválido impide construir la persona | `Party` | La regla está en el dominio para que proteja también la entrada por cola |
 | Se lanza la excepción cuando el envío no existe | `ConsultarEstadoEnvio`, `AdmitirEventoLogistico` | Sostiene el 404 de HU-02 y HU-03 |
 | El estado inicial es `REGISTERED` | `Shipment.registrar` | Primer criterio de HU-01 |
 | Se publica el evento de integración al registrar | `RegistrarEnvio`, `RegistrarEventoLogistico` | Si no se publica, las proyecciones no se enteran |

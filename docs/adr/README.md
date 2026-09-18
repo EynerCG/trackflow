@@ -12,6 +12,7 @@ primeras condicionan a las siguientes.
 | [ADR-005](ADR-005-modelo-de-lectura-para-consultas.md) | Modelo de lectura propio para la consulta de estado | Aceptada |
 | [ADR-006](ADR-006-flyway-para-el-esquema.md) | Flyway como dueño del esquema de base de datos | Aceptada |
 | [ADR-007](ADR-007-autenticacion-con-jwt.md) | Autenticación de operadores con JWT | Aceptada |
+| [ADR-008](ADR-008-tipo-y-numero-de-documento.md) | El documento se guarda como tipo y número | Aceptada |
 
 Cada ADR registra contexto, alternativas consideradas, decisión, consecuencias, responsable y
 fecha. Un ADR no se edita cuando cambia de opinión el equipo: se escribe uno nuevo que

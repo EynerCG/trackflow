@@ -2,6 +2,8 @@ package com.trackflow.modules.shipments.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Embeddable
 public class Party {
@@ -9,8 +11,12 @@ public class Party {
     @Column(nullable = false)
     private String fullName;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String documentId;
+    private TipoDocumento documentType;
+
+    @Column(nullable = false)
+    private String documentNumber;
 
     @Column(nullable = false)
     private String phone;
@@ -24,9 +30,16 @@ public class Party {
     protected Party() {
     }
 
-    public Party(String fullName, String documentId, String phone, String address, String city) {
+    public Party(String fullName, TipoDocumento documentType, String documentNumber,
+            String phone, String address, String city) {
+        String numero = documentNumber == null ? null : documentNumber.trim().toUpperCase();
+        if (documentType == null || !documentType.aceptaNumero(numero)) {
+            throw new DocumentoInvalidoException(documentType, documentNumber);
+        }
+
         this.fullName = fullName;
-        this.documentId = documentId;
+        this.documentType = documentType;
+        this.documentNumber = numero;
         this.phone = phone;
         this.address = address;
         this.city = city;
@@ -36,8 +49,12 @@ public class Party {
         return fullName;
     }
 
-    public String getDocumentId() {
-        return documentId;
+    public TipoDocumento getDocumentType() {
+        return documentType;
+    }
+
+    public String getDocumentNumber() {
+        return documentNumber;
     }
 
     public String getPhone() {

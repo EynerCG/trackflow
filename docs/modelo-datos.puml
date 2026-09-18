@@ -13,14 +13,16 @@ package "modules.shipments" #E8F4FD {
     --
     ' Party del remitente (objeto embebido)
     * sender_full_name : varchar
-    * sender_document_id : varchar
+    * sender_document_type : varchar <<check>>
+    * sender_document_number : varchar
     * sender_phone : varchar
     * sender_address : varchar
     * sender_city : varchar
     --
     ' Party del destinatario (objeto embebido)
     * recipient_full_name : varchar
-    * recipient_document_id : varchar
+    * recipient_document_type : varchar <<check>>
+    * recipient_document_number : varchar
     * recipient_phone : varchar
     * recipient_address : varchar
     * recipient_city : varchar

@@ -7,6 +7,7 @@ import com.trackflow.modules.shipments.application.EnvioSolicitado;
 import com.trackflow.modules.shipments.application.EnvioSolicitadoPublisher;
 import com.trackflow.modules.shipments.application.ShipmentRepository;
 import com.trackflow.modules.shipments.domain.Party;
+import com.trackflow.modules.shipments.domain.TipoDocumento;
 import com.trackflow.modules.shipments.domain.TrackingNumber;
 import java.time.Clock;
 import java.time.Duration;
@@ -82,8 +83,10 @@ public class DataSeeder implements ApplicationRunner {
         envios.publicar(new EnvioSolicitado(
                 "seed-env-" + trackingNumber,
                 trackingNumber,
-                new Party("Ana Remitente", "CC1001", "3001112233", "Calle 10 #20-30", "Medellín"),
-                new Party("Beto Destinatario", "CC2002", "3004445566", "Carrera 7 #40-50", "Bogotá"),
+                new Party("Ana Remitente", TipoDocumento.CC, "1017254893", "3001112233", "Calle 10 #20-30",
+                        "Medellín"),
+                new Party("Beto Destinatario", TipoDocumento.CC, "79546218", "3004445566", "Carrera 7 #40-50",
+                        "Bogotá"),
                 descripcion,
                 clock.instant()));
     }

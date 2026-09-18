@@ -12,8 +12,8 @@ El agregado principal. Una fila por envío.
 |---|---|---|
 | `id` | bigserial | PK |
 | `tracking_number` | varchar | **único**, identificador de negocio |
-| `sender_full_name`, `sender_document_id`, `sender_phone`, `sender_address`, `sender_city` | varchar | remitente |
-| `recipient_full_name`, `recipient_document_id`, `recipient_phone`, `recipient_address`, `recipient_city` | varchar | destinatario |
+| `sender_full_name`, `sender_document_type`, `sender_document_number`, `sender_phone`, `sender_address`, `sender_city` | varchar | remitente |
+| `recipient_full_name`, `recipient_document_type`, `recipient_document_number`, `recipient_phone`, `recipient_address`, `recipient_city` | varchar | destinatario |
 | `description` | varchar | descripción del paquete |
 | `status` | varchar | estado actual del envío |
 | `registered_at` | timestamptz | |
@@ -21,6 +21,12 @@ El agregado principal. Una fila por envío.
 
 Remitente y destinatario no son tablas aparte: son el objeto embebido `Party`, que se aplana en
 columnas con prefijo. No existe una entidad "cliente" porque el sprint no la requiere.
+
+El documento son **dos columnas**, no una. `*_document_type` guarda el tipo (`CC`, `CE`, `TI`,
+`PP`, `NIT`) con un `CHECK` que lo restringe al catálogo, y `*_document_number` el número. El
+tipo es el que decide cómo se valida el número, así que juntarlos en un solo texto impedía
+validar y también contar cuántos envíos los despacha una empresa (`NIT`) frente a una persona
+natural. Ver [ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md).
 
 ## `logistics_events` — módulo logistics
 

@@ -120,14 +120,16 @@ Swagger UI.
 {
   "remitente": {
     "nombreCompleto": "Ana Remitente",
-    "documento": "CC123",
+    "tipoDocumento": "CC",
+    "numeroDocumento": "1017254893",
     "telefono": "3001234567",
     "direccion": "Calle 10 #20-30",
     "ciudad": "Medellín"
   },
   "destinatario": {
-    "nombreCompleto": "Beto Destinatario",
-    "documento": "CC456",
+    "nombreCompleto": "Distribuciones del Norte S.A.S.",
+    "tipoDocumento": "NIT",
+    "numeroDocumento": "890903938-8",
     "telefono": "3007654321",
     "direccion": "Carrera 7 #40-50",
     "ciudad": "Bogotá"
@@ -138,6 +140,17 @@ Swagger UI.
 
 Responde `202 Accepted` con el número de seguimiento. Si falta un campo obligatorio responde
 `400` indicando cuál.
+
+`tipoDocumento` acepta `CC`, `CE`, `TI`, `PP` o `NIT`, y cada uno valida su número:
+
+| Tipo | Formato exigido |
+| --- | --- |
+| `CC`, `CE` | entre 6 y 10 dígitos |
+| `TI` | entre 10 y 11 dígitos |
+| `PP` | entre 5 y 15 caracteres, letras mayúsculas y dígitos |
+| `NIT` | 9 o 10 dígitos; si trae dígito de verificación (`890903938-8`) se comprueba con las ponderaciones de la DIAN |
+
+Un número que no corresponde al tipo responde `400` explicando el formato esperado.
 
 ### Registrar un evento (HU-02)
 

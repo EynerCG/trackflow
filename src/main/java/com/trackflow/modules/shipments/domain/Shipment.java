@@ -27,7 +27,8 @@ public class Shipment {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fullName", column = @Column(name = "sender_full_name", nullable = false)),
-            @AttributeOverride(name = "documentId", column = @Column(name = "sender_document_id", nullable = false)),
+            @AttributeOverride(name = "documentType", column = @Column(name = "sender_document_type", nullable = false, length = 5)),
+            @AttributeOverride(name = "documentNumber", column = @Column(name = "sender_document_number", nullable = false)),
             @AttributeOverride(name = "phone", column = @Column(name = "sender_phone", nullable = false)),
             @AttributeOverride(name = "address", column = @Column(name = "sender_address", nullable = false)),
             @AttributeOverride(name = "city", column = @Column(name = "sender_city", nullable = false))
@@ -37,7 +38,8 @@ public class Shipment {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fullName", column = @Column(name = "recipient_full_name", nullable = false)),
-            @AttributeOverride(name = "documentId", column = @Column(name = "recipient_document_id", nullable = false)),
+            @AttributeOverride(name = "documentType", column = @Column(name = "recipient_document_type", nullable = false, length = 5)),
+            @AttributeOverride(name = "documentNumber", column = @Column(name = "recipient_document_number", nullable = false)),
             @AttributeOverride(name = "phone", column = @Column(name = "recipient_phone", nullable = false)),
             @AttributeOverride(name = "address", column = @Column(name = "recipient_address", nullable = false)),
             @AttributeOverride(name = "city", column = @Column(name = "recipient_city", nullable = false))

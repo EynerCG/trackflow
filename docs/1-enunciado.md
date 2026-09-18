@@ -86,7 +86,8 @@ decisiones **están tomadas en el código pero no han sido validadas con el due�
 
 | Pregunta abierta | Supuesto aplicado |
 |---|---|
-| ¿Qué datos del remitente y destinatario son obligatorios? | Todos: nombre, documento, teléfono, dirección y ciudad |
+| ¿Qué datos del remitente y destinatario son obligatorios? | Todos: nombre, tipo y número de documento, teléfono, dirección y ciudad |
+| ¿Qué documentos se admiten? | `CC`, `CE`, `TI`, `PP` y `NIT`, cada uno con su formato validado ([ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md)) |
 | ¿Qué formato tiene el número de seguimiento? | `TF` + 12 caracteres alfanuméricos en mayúscula |
 | ¿Cuál es el estado inicial de un envío? | `REGISTERED` |
 | ¿Un registro cubre varios paquetes? | Un envío por paquete |
