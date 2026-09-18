@@ -78,10 +78,26 @@ public class Shipment {
         return new Shipment(trackingNumber, sender, recipient, description, registeredAt);
     }
 
-    public void aplicarMovimiento(ShipmentStatus resultingStatus, String point, Instant movedAt) {
+    /**
+     * Aplica un movimiento siempre que sea posterior al último conocido.
+     *
+     * Los movimientos no llegan necesariamente en orden: el lector de una bodega sin
+     * señal descarga sus registros horas después, y el broker puede reentregar un
+     * mensaje. Sin esta comprobación, un movimiento reportado tarde devolvería el
+     * envío a "en tránsito" cuando ya estaba entregado.
+     *
+     * @return false si el movimiento es anterior al último aplicado y se ignora
+     */
+    public boolean aplicarMovimiento(ShipmentStatus resultingStatus, String point, Instant movedAt) {
+        if (lastMovementAt != null && movedAt.isBefore(lastMovementAt)) {
+            return false;
+        }
+
         this.status = resultingStatus;
         this.lastMovementPoint = point;
         this.lastMovementAt = movedAt;
+
+        return true;
     }
 
     public Long getId() {

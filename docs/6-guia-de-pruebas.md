@@ -27,6 +27,15 @@ también responde `400`: una cédula son entre 6 y 10 dígitos. Los formatos est
 [4. Ejecución](4-ejecucion.md) y el porqué en
 [ADR-008](adr/ADR-008-tipo-y-numero-de-documento.md).
 
+## Lo tercero: el evento puede decir cuándo ocurrió
+
+`POST /api/shipments/{tracking}/events` acepta `ocurridoEn`, opcional. Sin él se asume que el
+movimiento acaba de ocurrir.
+
+Para las pruebas importa una regla: **un movimiento anterior al último aplicado se guarda en el
+historial pero no cambia el estado**. Es lo que impide que un reporte rezagado devuelva a "en
+tránsito" un envío entregado ([ADR-009](adr/ADR-009-fecha-de-ocurrencia-del-movimiento.md)).
+
 ## Qué conviene probar, por nivel
 
 ### Pruebas unitarias (sin base de datos ni broker)
@@ -41,6 +50,8 @@ Son las de las tareas 77, 79 y 81. Se prueban los casos de uso con dobles de los
 | Se rechazan los formatos inválidos | `TrackingNumber` | El value object es quien garantiza el formato |
 | Cada tipo de documento acepta su formato y rechaza los demás | `TipoDocumento` | Incluye el dígito de verificación del NIT |
 | Un documento inválido impide construir la persona | `Party` | La regla está en el dominio para que proteja también la entrada por cola |
+| Un movimiento anterior al último no cambia el estado | `Shipment.aplicarMovimiento`, `ShipmentTrackingView.aplicarMovimiento` | Es lo que impide que el estado retroceda; hay que probarlo en los dos |
+| Un movimiento con fecha futura se rechaza | `LogisticsEvent.registrar` | |
 | Se lanza la excepción cuando el envío no existe | `ConsultarEstadoEnvio`, `AdmitirEventoLogistico` | Sostiene el 404 de HU-02 y HU-03 |
 | El estado inicial es `REGISTERED` | `Shipment.registrar` | Primer criterio de HU-01 |
 | Se publica el evento de integración al registrar | `RegistrarEnvio`, `RegistrarEventoLogistico` | Si no se publica, las proyecciones no se enteran |

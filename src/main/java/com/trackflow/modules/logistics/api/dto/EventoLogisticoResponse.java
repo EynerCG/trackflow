@@ -10,7 +10,8 @@ public record EventoLogisticoResponse(
         String estadoResultante,
         String punto,
         String observaciones,
-        Instant registeredAt) {
+        Instant ocurridoEn,
+        Instant registradoEn) {
 
     public static EventoLogisticoResponse from(LogisticsEvent event) {
         return new EventoLogisticoResponse(
@@ -20,6 +21,7 @@ public record EventoLogisticoResponse(
                 event.getType().resultingStatus(),
                 event.getPoint(),
                 event.getNotes(),
+                event.getOccurredAt(),
                 event.getRegisteredAt());
     }
 }

@@ -52,6 +52,7 @@ public class RegistrarEventoLogistico {
                 entrante.tipo(),
                 entrante.punto(),
                 entrante.observaciones(),
+                entrante.ocurridoEn(),
                 now));
 
         events.publish(new EventoLogisticoRegistradoEvent(
@@ -60,6 +61,7 @@ public class RegistrarEventoLogistico {
                 saved.getType().name(),
                 saved.getType().resultingStatus(),
                 saved.getPoint(),
+                saved.getOccurredAt(),
                 saved.getRegisteredAt(),
                 now));
 

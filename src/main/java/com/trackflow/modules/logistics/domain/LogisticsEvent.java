@@ -34,6 +34,11 @@ public class LogisticsEvent {
 
     private String notes;
 
+    /** Cuándo ocurrió el movimiento. Es la fecha que ve el cliente y la que ordena el historial. */
+    @Column(nullable = false, updatable = false)
+    private Instant occurredAt;
+
+    /** Cuándo se recibió el reporte. Sirve para auditar cuánto tardó en reportarse. */
     @Column(nullable = false, updatable = false)
     private Instant registeredAt;
 
@@ -41,18 +46,27 @@ public class LogisticsEvent {
     }
 
     private LogisticsEvent(String eventId, String trackingNumber, EventType type, String point, String notes,
-            Instant registeredAt) {
+            Instant occurredAt, Instant registeredAt) {
         this.eventId = eventId;
         this.trackingNumber = trackingNumber;
         this.type = type;
         this.point = point;
         this.notes = notes;
+        this.occurredAt = occurredAt;
         this.registeredAt = registeredAt;
     }
 
+    /**
+     * Un movimiento no puede haber ocurrido después de reportarse. Se comprueba aquí
+     * y no en el DTO porque el reporte llega por REST y también por la cola.
+     */
     public static LogisticsEvent registrar(String eventId, String trackingNumber, EventType type, String point,
-            String notes, Instant registeredAt) {
-        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, registeredAt);
+            String notes, Instant occurredAt, Instant registeredAt) {
+        if (occurredAt == null || occurredAt.isAfter(registeredAt)) {
+            throw new FechaDeMovimientoInvalidaException(occurredAt, registeredAt);
+        }
+
+        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, occurredAt, registeredAt);
     }
 
     public Long getId() {
@@ -77,6 +91,10 @@ public class LogisticsEvent {
 
     public String getNotes() {
         return notes;
+    }
+
+    public Instant getOccurredAt() {
+        return occurredAt;
     }
 
     public Instant getRegisteredAt() {

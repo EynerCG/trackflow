@@ -44,6 +44,7 @@ package "modules.logistics" #FFF4E5 {
     * type : varchar <<enum>>
     * point : varchar
     notes : varchar
+    * occurred_at : timestamptz
     * registered_at : timestamptz
   }
 

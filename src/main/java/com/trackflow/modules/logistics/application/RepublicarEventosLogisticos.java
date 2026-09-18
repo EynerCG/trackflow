@@ -40,6 +40,7 @@ public class RepublicarEventosLogisticos {
                     evento.getType().name(),
                     evento.getType().resultingStatus(),
                     evento.getPoint(),
+                    evento.getOccurredAt(),
                     evento.getRegisteredAt(),
                     clock.instant()));
         }

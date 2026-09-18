@@ -40,7 +40,11 @@ El historial de movimientos. Una fila por evento reportado.
 | `type` | varchar | tipo de evento logístico |
 | `point` | varchar | punto de la cadena donde ocurrió |
 | `notes` | varchar | opcional |
-| `registered_at` | timestamptz | |
+| `occurred_at` | timestamptz | **cuándo ocurrió** el movimiento; ordena el historial |
+| `registered_at` | timestamptz | cuándo se recibió el reporte |
+
+Las dos fechas no son lo mismo y confundirlas hacía retroceder el estado del envío. Ver
+[ADR-009](adr/ADR-009-fecha-de-ocurrencia-del-movimiento.md).
 
 ## `logistics_tracked_shipments` — módulo logistics
 

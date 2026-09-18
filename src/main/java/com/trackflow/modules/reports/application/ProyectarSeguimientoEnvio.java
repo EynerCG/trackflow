@@ -29,8 +29,9 @@ public class ProyectarSeguimientoEnvio {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void alRegistrarseUnEvento(EventoLogisticoRegistradoEvent event) {
         views.findByTrackingNumber(event.trackingNumber()).ifPresent(view -> {
-            view.aplicarMovimiento(event.resultingStatus(), event.point(), event.registeredAt());
-            views.save(view);
+            if (view.aplicarMovimiento(event.resultingStatus(), event.point(), event.movedAt())) {
+                views.save(view);
+            }
         });
     }
 }

@@ -41,7 +41,8 @@ public class LogisticsEventController {
                 trackingNumber,
                 request.tipo(),
                 request.punto(),
-                request.observaciones()));
+                request.observaciones(),
+                request.ocurridoEn()));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(EventoAdmitidoResponse.from(evento));
     }

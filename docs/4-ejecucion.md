@@ -162,6 +162,22 @@ Un número que no corresponde al tipo responde `400` explicando el formato esper
 
 Responde `202`. Con un número inexistente, `404`.
 
+`ocurridoEn` es opcional y dice **cuándo ocurrió el movimiento**. Si no se envía, se asume que
+acaba de ocurrir. Se usa cuando el reporte llega tarde, que es lo normal si el lector de la
+bodega estuvo sin señal:
+
+```json
+{
+  "tipo": "RECEIVED_AT_CENTER",
+  "punto": "Centro de distribución Medellín",
+  "ocurridoEn": "2026-09-18T06:30:00Z"
+}
+```
+
+Una fecha futura responde `400`. Un movimiento anterior al último aplicado se registra en el
+historial pero **no cambia el estado** del envío: así un reporte rezagado no devuelve a "en
+tránsito" un envío ya entregado.
+
 ### Consultar el estado (HU-03)
 
 `GET /api/tracking/{trackingNumber}` → estado actual, y punto y fecha del último movimiento.

@@ -13,6 +13,7 @@ primeras condicionan a las siguientes.
 | [ADR-006](ADR-006-flyway-para-el-esquema.md) | Flyway como dueño del esquema de base de datos | Aceptada |
 | [ADR-007](ADR-007-autenticacion-con-jwt.md) | Autenticación de operadores con JWT | Aceptada |
 | [ADR-008](ADR-008-tipo-y-numero-de-documento.md) | El documento se guarda como tipo y número | Aceptada |
+| [ADR-009](ADR-009-fecha-de-ocurrencia-del-movimiento.md) | El movimiento guarda cuándo ocurrió, no solo cuándo se reportó | Aceptada |
 
 Cada ADR registra contexto, alternativas consideradas, decisión, consecuencias, responsable y
 fecha. Un ADR no se edita cuando cambia de opinión el equipo: se escribe uno nuevo que

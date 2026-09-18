@@ -44,10 +44,23 @@ public class ShipmentTrackingView {
         this.registeredAt = registeredAt;
     }
 
-    public void aplicarMovimiento(String status, String point, Instant movedAt) {
+    /**
+     * Ignora los movimientos anteriores al último aplicado, por la misma razón que el
+     * agregado: los reportes no llegan necesariamente en orden y un movimiento
+     * rezagado no debe hacer retroceder el estado que ve el cliente.
+     *
+     * @return false si el movimiento es anterior al último aplicado y se ignora
+     */
+    public boolean aplicarMovimiento(String status, String point, Instant movedAt) {
+        if (lastMovementAt != null && movedAt.isBefore(lastMovementAt)) {
+            return false;
+        }
+
         this.status = status;
         this.lastMovementPoint = point;
         this.lastMovementAt = movedAt;
+
+        return true;
     }
 
     public boolean tieneMovimientos() {

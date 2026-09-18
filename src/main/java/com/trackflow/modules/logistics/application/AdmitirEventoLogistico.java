@@ -1,8 +1,10 @@
 package com.trackflow.modules.logistics.application;
 
 import com.trackflow.modules.logistics.domain.EventType;
+import com.trackflow.modules.logistics.domain.FechaDeMovimientoInvalidaException;
 import com.trackflow.modules.logistics.domain.UnknownShipmentException;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +15,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class AdmitirEventoLogistico {
 
-    public record Command(String trackingNumber, EventType tipo, String punto, String observaciones) {
+    /**
+     * {@code ocurridoEn} es opcional: si el punto de la cadena no lo reporta, se
+     * asume que el movimiento acaba de ocurrir.
+     */
+    public record Command(String trackingNumber, EventType tipo, String punto, String observaciones,
+            Instant ocurridoEn) {
     }
 
     private final TrackedShipmentRepository trackedShipments;
@@ -32,13 +39,20 @@ public class AdmitirEventoLogistico {
             throw new UnknownShipmentException(command.trackingNumber());
         }
 
+        Instant ahora = clock.instant();
+        Instant ocurridoEn = command.ocurridoEn() == null ? ahora : command.ocurridoEn();
+
+        if (ocurridoEn.isAfter(ahora)) {
+            throw new FechaDeMovimientoInvalidaException(ocurridoEn, ahora);
+        }
+
         EventoLogisticoEntrante evento = new EventoLogisticoEntrante(
                 UUID.randomUUID().toString(),
                 command.trackingNumber(),
                 command.tipo(),
                 command.punto(),
                 command.observaciones(),
-                clock.instant());
+                ocurridoEn);
 
         publisher.publicar(evento);
 
