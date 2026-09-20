@@ -40,6 +40,7 @@ public class LogisticsEventController {
         EventoLogisticoEntrante evento = admitirEventoLogistico.ejecutar(new AdmitirEventoLogistico.Command(
                 trackingNumber,
                 request.tipo(),
+                request.centroId(),
                 request.punto(),
                 request.observaciones(),
                 request.ocurridoEn()));

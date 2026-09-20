@@ -12,7 +12,9 @@ public record EventoLogisticoMensaje(
         String eventId,
         String trackingNumber,
         String tipo,
+        Long centroId,
         String punto,
+        String ciudadNombre,
         String observaciones,
         Instant ocurridoEn) {
 
@@ -21,7 +23,9 @@ public record EventoLogisticoMensaje(
                 evento.eventId(),
                 evento.trackingNumber(),
                 evento.tipo().name(),
+                evento.centroId(),
                 evento.punto(),
+                evento.ciudadNombre(),
                 evento.observaciones(),
                 evento.ocurridoEn());
     }
@@ -31,7 +35,9 @@ public record EventoLogisticoMensaje(
                 eventId,
                 trackingNumber,
                 EventType.valueOf(tipo),
+                centroId,
                 punto,
+                ciudadNombre,
                 observaciones,
                 ocurridoEn);
     }

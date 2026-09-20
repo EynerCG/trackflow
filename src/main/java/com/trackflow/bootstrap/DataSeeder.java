@@ -1,7 +1,9 @@
 package com.trackflow.bootstrap;
 
+import com.trackflow.modules.logistics.application.CatalogoDeCentros;
 import com.trackflow.modules.logistics.application.EventoLogisticoEntrante;
 import com.trackflow.modules.logistics.application.EventoLogisticoPublisher;
+import com.trackflow.modules.logistics.domain.Centro;
 import com.trackflow.modules.logistics.domain.EventType;
 import com.trackflow.modules.shipments.application.EnvioSolicitado;
 import com.trackflow.modules.shipments.application.EnvioSolicitadoPublisher;
@@ -45,14 +47,16 @@ public class DataSeeder implements ApplicationRunner {
     private final EventoLogisticoPublisher eventos;
     private final ShipmentRepository shipments;
     private final CatalogoDeCiudades ciudades;
+    private final CatalogoDeCentros centros;
     private final Clock clock;
 
     public DataSeeder(EnvioSolicitadoPublisher envios, EventoLogisticoPublisher eventos, ShipmentRepository shipments,
-            CatalogoDeCiudades ciudades, Clock clock) {
+            CatalogoDeCiudades ciudades, CatalogoDeCentros centros, Clock clock) {
         this.envios = envios;
         this.eventos = eventos;
         this.shipments = shipments;
         this.ciudades = ciudades;
+        this.centros = centros;
         this.clock = clock;
     }
 
@@ -72,12 +76,24 @@ public class DataSeeder implements ApplicationRunner {
         esperarA(EN_TRANSITO);
         esperarA(ENTREGADO);
 
-        publicarEvento("seed-evt-001", EN_TRANSITO, EventType.RECEIVED_AT_CENTER, "Centro de distribución Medellín");
-        publicarEvento("seed-evt-002", EN_TRANSITO, EventType.DISPATCHED, "Ruta Medellín - Bogotá");
+        // El origen de los tres envíos semilla es Medellín (ver solicitarEnvio), así
+        // que el primer RECEIVED_AT_CENTER usa un centro real de esa ciudad — con el
+        // catálogo ya no tendría sentido decir "Cali" cuando el envío sale de
+        // Medellín, y con la regla de coherencia nueva directamente lo rechazaría.
+        Ciudad medellin = buscarCiudad("MEDELLÍN");
+        Centro centroNorteMedellin = buscarCentro("Centro Norte", medellin.id());
 
-        publicarEvento("seed-evt-003", ENTREGADO, EventType.RECEIVED_AT_CENTER, "Centro de distribución Cali");
-        publicarEvento("seed-evt-004", ENTREGADO, EventType.OUT_FOR_DELIVERY, "Reparto Cali norte");
-        publicarEvento("seed-evt-005", ENTREGADO, EventType.DELIVERED, "Dirección del destinatario");
+        publicarEventoConCentro("seed-evt-001", EN_TRANSITO, EventType.RECEIVED_AT_CENTER, centroNorteMedellin,
+                medellin);
+        // DISPATCHED no tiene una regla de coherencia de ciudad ("en ruta" no es un
+        // lugar fijo del catálogo), así que se deja con el respaldo de texto libre a
+        // propósito: además demuestra que ese camino sigue funcionando.
+        publicarEventoConPunto("seed-evt-002", EN_TRANSITO, EventType.DISPATCHED, "Ruta Medellín - Bogotá");
+
+        publicarEventoConCentro("seed-evt-003", ENTREGADO, EventType.RECEIVED_AT_CENTER, centroNorteMedellin,
+                medellin);
+        publicarEventoConPunto("seed-evt-004", ENTREGADO, EventType.OUT_FOR_DELIVERY, "Reparto Bogotá norte");
+        publicarEventoConPunto("seed-evt-005", ENTREGADO, EventType.DELIVERED, "Dirección del destinatario");
 
         log.info("Datos semilla encolados: {} (sin movimientos), {} (en tránsito), {} (entregado)",
                 SIN_MOVIMIENTOS, EN_TRANSITO, ENTREGADO);
@@ -109,9 +125,26 @@ public class DataSeeder implements ApplicationRunner {
                         "El catálogo de ciudades no tiene '%s'; revise la migración V4".formatted(nombre)));
     }
 
-    private void publicarEvento(String eventId, String trackingNumber, EventType tipo, String punto) {
+    private Centro buscarCentro(String nombre, Long ciudadId) {
+        return centros.buscar(nombre, ciudadId, 1).stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "El catálogo de centros no tiene '%s' en la ciudad %d; revise la migración V6"
+                                .formatted(nombre, ciudadId)));
+    }
+
+    /** Evento con centro del catálogo: resuelve el nombre y la ciudad como lo haría AdmitirEventoLogistico. */
+    private void publicarEventoConCentro(String eventId, String trackingNumber, EventType tipo, Centro centro,
+            Ciudad ciudadCentro) {
         eventos.publicar(new EventoLogisticoEntrante(
-                eventId, trackingNumber, tipo, punto, null, clock.instant()));
+                eventId, trackingNumber, tipo, centro.getId(), centro.getName(), ciudadCentro.etiqueta(), null,
+                clock.instant()));
+    }
+
+    /** Evento con el respaldo de texto libre, deprecado. */
+    private void publicarEventoConPunto(String eventId, String trackingNumber, EventType tipo, String punto) {
+        eventos.publicar(new EventoLogisticoEntrante(
+                eventId, trackingNumber, tipo, null, punto, null, null, clock.instant()));
     }
 
     private boolean existe(String trackingNumber) {

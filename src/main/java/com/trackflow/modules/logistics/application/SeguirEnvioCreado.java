@@ -17,6 +17,7 @@ public class SeguirEnvioCreado {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void ejecutar(EnvioCreadoEvent event) {
-        trackedShipments.save(new TrackedShipment(event.trackingNumber(), event.registeredAt()));
+        trackedShipments.save(new TrackedShipment(event.trackingNumber(), event.registeredAt(),
+                event.originCityId(), event.destinationCityId()));
     }
 }

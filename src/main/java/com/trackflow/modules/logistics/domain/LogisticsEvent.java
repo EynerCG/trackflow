@@ -34,6 +34,19 @@ public class LogisticsEvent {
 
     private String notes;
 
+    /**
+     * Id del centro del catálogo, si el evento se reportó con uno. Nullable a
+     * propósito: eventos históricos y los que usan el respaldo de texto libre no
+     * tienen centro asociado. No se resuelve como referencia viva — si el centro se
+     * renombra o desactiva después, este evento no cambia.
+     */
+    @Column(updatable = false)
+    private Long centerId;
+
+    /** Nombre de la ciudad del centro, congelado en el momento del registro. */
+    @Column(updatable = false)
+    private String cityName;
+
     /** Cuándo ocurrió el movimiento. Es la fecha que ve el cliente y la que ordena el historial. */
     @Column(nullable = false, updatable = false)
     private Instant occurredAt;
@@ -46,12 +59,14 @@ public class LogisticsEvent {
     }
 
     private LogisticsEvent(String eventId, String trackingNumber, EventType type, String point, String notes,
-            Instant occurredAt, Instant registeredAt) {
+            Long centerId, String cityName, Instant occurredAt, Instant registeredAt) {
         this.eventId = eventId;
         this.trackingNumber = trackingNumber;
         this.type = type;
         this.point = point;
         this.notes = notes;
+        this.centerId = centerId;
+        this.cityName = cityName;
         this.occurredAt = occurredAt;
         this.registeredAt = registeredAt;
     }
@@ -61,12 +76,13 @@ public class LogisticsEvent {
      * y no en el DTO porque el reporte llega por REST y también por la cola.
      */
     public static LogisticsEvent registrar(String eventId, String trackingNumber, EventType type, String point,
-            String notes, Instant occurredAt, Instant registeredAt) {
+            String notes, Long centerId, String cityName, Instant occurredAt, Instant registeredAt) {
         if (occurredAt == null || occurredAt.isAfter(registeredAt)) {
             throw new FechaDeMovimientoInvalidaException(occurredAt, registeredAt);
         }
 
-        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, occurredAt, registeredAt);
+        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, centerId, cityName, occurredAt,
+                registeredAt);
     }
 
     public Long getId() {
@@ -91,6 +107,14 @@ public class LogisticsEvent {
 
     public String getNotes() {
         return notes;
+    }
+
+    public Long getCenterId() {
+        return centerId;
+    }
+
+    public String getCityName() {
+        return cityName;
     }
 
     public Instant getOccurredAt() {
