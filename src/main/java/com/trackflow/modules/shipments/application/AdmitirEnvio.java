@@ -47,6 +47,7 @@ public class AdmitirEnvio {
                 trackingNumber.value(),
                 aParty(command.remitente(), ciudadRemitente),
                 aParty(command.destinatario(), ciudadDestino),
+                ciudadRemitente,
                 ciudadDestino,
                 command.descripcion(),
                 clock.instant());

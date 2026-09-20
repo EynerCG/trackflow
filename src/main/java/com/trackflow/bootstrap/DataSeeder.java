@@ -96,6 +96,7 @@ public class DataSeeder implements ApplicationRunner {
                         origen.id()),
                 new Party("Beto Destinatario", TipoDocumento.CC, "79546218", "3004445566", "Carrera 7 #40-50",
                         destino.id()),
+                origen,
                 destino,
                 descripcion,
                 clock.instant()));

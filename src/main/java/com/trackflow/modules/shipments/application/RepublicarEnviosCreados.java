@@ -39,11 +39,15 @@ public class RepublicarEnviosCreados {
         List<Shipment> todos = shipments.findAll();
 
         for (Shipment shipment : todos) {
+            Ciudad ciudadOrigen = ciudades.exigir(shipment.getSender().getCityId());
             Ciudad ciudadDestino = ciudades.exigir(shipment.getRecipient().getCityId());
 
             events.publish(new EnvioCreadoEvent(
                     shipment.getTrackingNumber().value(),
                     shipment.getStatus().name(),
+                    shipment.getSender().getFullName(),
+                    ciudadOrigen.id(),
+                    ciudadOrigen.etiqueta(),
                     shipment.getRecipient().getFullName(),
                     ciudadDestino.id(),
                     ciudadDestino.etiqueta(),

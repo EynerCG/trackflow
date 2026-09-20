@@ -14,6 +14,7 @@ public record EnvioSolicitadoMensaje(
         String trackingNumber,
         PersonaMensaje remitente,
         PersonaMensaje destinatario,
+        CiudadMensaje ciudadOrigen,
         CiudadMensaje ciudadDestino,
         String descripcion,
         Instant solicitadoEn) {
@@ -59,6 +60,7 @@ public record EnvioSolicitadoMensaje(
                 solicitud.trackingNumber(),
                 PersonaMensaje.from(solicitud.remitente()),
                 PersonaMensaje.from(solicitud.destinatario()),
+                CiudadMensaje.from(solicitud.ciudadOrigen()),
                 CiudadMensaje.from(solicitud.ciudadDestino()),
                 solicitud.descripcion(),
                 solicitud.solicitadoEn());
@@ -70,6 +72,7 @@ public record EnvioSolicitadoMensaje(
                 trackingNumber,
                 remitente.toDomain(),
                 destinatario.toDomain(),
+                ciudadOrigen.toDomain(),
                 ciudadDestino.toDomain(),
                 descripcion,
                 solicitadoEn);

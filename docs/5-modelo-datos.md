@@ -86,14 +86,17 @@ El modelo de lectura de HU-03. Lo construyen los dos eventos de integración.
 |---|---|
 | `tracking_number` | varchar, PK |
 | `status` | varchar |
+| `sender_name` | varchar |
+| `origin_city_id` | bigint |
+| `origin_city` | varchar (la etiqueta: "MEDELLÍN - ANTIOQUIA") |
 | `recipient_name` | varchar |
 | `destination_city_id` | bigint |
 | `destination_city` | varchar (la etiqueta: "BOGOTÁ - CUNDINAMARCA") |
 | `registered_at` | timestamptz |
 | `last_movement_point`, `last_movement_at` | varchar, timestamptz |
 
-Contiene solo lo que el cliente puede ver: no expone remitente, teléfonos ni direcciones, que
-son datos de operación.
+Expone nombre y ciudad de remitente y destinatario, que es lo que el cliente necesita ver en el
+seguimiento. Sigue sin exponer teléfonos ni direcciones, que son datos de operación.
 
 ## Dos decisiones que explican el modelo
 

@@ -51,6 +51,9 @@ public class RegistrarEnvio {
         events.publish(new EnvioCreadoEvent(
                 saved.getTrackingNumber().value(),
                 saved.getStatus().name(),
+                saved.getSender().getFullName(),
+                solicitud.ciudadOrigen().id(),
+                solicitud.ciudadOrigen().etiqueta(),
                 saved.getRecipient().getFullName(),
                 solicitud.ciudadDestino().id(),
                 solicitud.ciudadDestino().etiqueta(),

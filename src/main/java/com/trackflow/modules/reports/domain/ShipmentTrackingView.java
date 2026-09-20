@@ -20,6 +20,17 @@ public class ShipmentTrackingView {
     private String status;
 
     @Column(nullable = false)
+    private String senderName;
+
+    /** Identificador de la ciudad en el catálogo, para agrupar por origen. */
+    @Column(nullable = false)
+    private Long originCityId;
+
+    /** Misma duplicación intencional que destinationCity, para el origen. */
+    @Column(nullable = false)
+    private String originCity;
+
+    @Column(nullable = false)
     private String recipientName;
 
     /** Identificador de la ciudad en el catálogo, para agrupar por destino. */
@@ -43,10 +54,14 @@ public class ShipmentTrackingView {
     protected ShipmentTrackingView() {
     }
 
-    public ShipmentTrackingView(String trackingNumber, String status, String recipientName, Long destinationCityId,
-            String destinationCity, Instant registeredAt) {
+    public ShipmentTrackingView(String trackingNumber, String status, String senderName, Long originCityId,
+            String originCity, String recipientName, Long destinationCityId, String destinationCity,
+            Instant registeredAt) {
         this.trackingNumber = trackingNumber;
         this.status = status;
+        this.senderName = senderName;
+        this.originCityId = originCityId;
+        this.originCity = originCity;
         this.recipientName = recipientName;
         this.destinationCityId = destinationCityId;
         this.destinationCity = destinationCity;
@@ -82,6 +97,18 @@ public class ShipmentTrackingView {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public Long getOriginCityId() {
+        return originCityId;
+    }
+
+    public String getOriginCity() {
+        return originCity;
     }
 
     public String getRecipientName() {
