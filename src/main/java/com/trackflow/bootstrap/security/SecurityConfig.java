@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -34,9 +35,18 @@ public class SecurityConfig {
         boolean protegido = propiedades.proteccionActiva();
 
         http
+                // Sin esto, el filtro de seguridad rechaza las peticiones preflight antes de
+                // que se aplique la configuración CORS de Spring MVC (ver CorsConfig).
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
+                    // El OPTIONS de precomprobación nunca lleva token, por diseño del propio
+                    // CORS: si una regla de rol lo alcanza (como pasaba con /api/admin/**, que
+                    // no distinguía el método), el navegador ve un 401 en la precomprobación y
+                    // ni siquiera intenta la petición real. Dejarlo pasar aquí no abre nada: la
+                    // petición real —GET, POST— sigue evaluándose por las reglas de abajo.
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/tracking/**").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/shipments/*/events").permitAll();
