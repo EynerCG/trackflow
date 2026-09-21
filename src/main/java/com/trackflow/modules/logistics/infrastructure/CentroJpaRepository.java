@@ -15,12 +15,20 @@ interface CentroJpaRepository extends JpaRepository<Centro, Long> {
      * sirve para registrar un evento nuevo, así que tampoco tiene sentido ofrecerlo
      * en el autocompletado.
      */
+    /**
+     * El cast de :texto no es adorno. Cuando llega null, Postgres no tiene de dónde
+     * deducir el tipo del parámetro dentro de upper(...) y lo asume bytea, con lo que
+     * la consulta ni siquiera se planifica ("function upper(bytea) does not exist").
+     * Decirle que es texto basta para que la rama del null funcione.
+     */
     @Query("""
             select c from Centro c
-            where (:texto is null or upper(c.name) like upper(concat('%', :texto, '%')))
+            where (cast(:texto as String) is null
+                   or upper(c.name) like upper(concat('%', cast(:texto as String), '%')))
               and (:ciudadId is null or c.cityId = :ciudadId)
               and c.active = true
-            order by case when :texto is not null and upper(c.name) like upper(concat(:texto, '%'))
+            order by case when cast(:texto as String) is not null
+                           and upper(c.name) like upper(concat(cast(:texto as String), '%'))
                           then 0 else 1 end,
                      c.name
             """)
