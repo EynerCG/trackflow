@@ -93,6 +93,7 @@ decisiones **están tomadas en el código pero no han sido validadas con el due�
 | ¿Qué formato tiene el número de seguimiento? | `TF` + 12 caracteres alfanuméricos en mayúscula |
 | ¿Cuál es el estado inicial de un envío? | `REGISTERED` |
 | ¿Un registro cubre varios paquetes? | Un envío por paquete |
-| ¿Qué transiciones de estado son válidas? | Sin restricción: cualquier evento se acepta |
-| ¿Qué pasa si llega un evento sobre un envío entregado? | Se acepta y actualiza el estado |
+| ¿Qué transiciones de estado son válidas? | Solo las del recorrido: de un centro se despacha, en tránsito se llega al destino o a un hub, y del reparto se entrega ([docs/7](7-flujo-del-envio.md)) |
+| ¿Qué pasa si llega un evento sobre un envío entregado? | Se rechaza con `422`: entregado es terminal |
+| ¿Dónde puede ocurrir cada movimiento? | En un centro del catálogo, en la ciudad que el recorrido exige: origen, destino, o donde está el paquete |
 | ¿Quién puede registrar envíos y eventos? | Sin autenticación en este sprint |

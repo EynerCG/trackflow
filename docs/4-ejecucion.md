@@ -171,10 +171,15 @@ Un número que no corresponde al tipo responde `400` explicando el formato esper
 `POST /api/shipments/{trackingNumber}/events`
 
 ```json
-{ "tipo": "DISPATCHED", "punto": "Centro de distribución Medellín" }
+{ "tipo": "DISPATCHED", "centroId": 1 }
 ```
 
 Responde `202`. Con un número inexistente, `404`.
+
+`centroId` es obligatorio y sale del catálogo de centros. Cuáles valen para este envío en
+este momento lo dice `GET /api/shipments/{trackingNumber}/acciones`, que además responde qué
+movimientos admite ahora ([docs/7](7-flujo-del-envio.md)). Un movimiento que no cabe en el
+recorrido, o un centro en la ciudad equivocada, responden `422`.
 
 `ocurridoEn` es opcional y dice **cuándo ocurrió el movimiento**. Si no se envía, se asume que
 acaba de ocurrir. Se usa cuando el reporte llega tarde, que es lo normal si el lector de la
@@ -183,14 +188,13 @@ bodega estuvo sin señal:
 ```json
 {
   "tipo": "RECEIVED_AT_CENTER",
-  "punto": "Centro de distribución Medellín",
+  "centroId": 1,
   "ocurridoEn": "2026-09-18T06:30:00Z"
 }
 ```
 
-Una fecha futura responde `400`. Un movimiento anterior al último aplicado se registra en el
-historial pero **no cambia el estado** del envío: así un reporte rezagado no devuelve a "en
-tránsito" un envío ya entregado.
+Una fecha futura responde `400`, y una anterior al último movimiento registrado, `422`: reportar
+tarde vale, pero no intercalar un movimiento en el pasado del recorrido.
 
 ### Consultar el estado (HU-03)
 
