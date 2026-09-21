@@ -125,11 +125,14 @@ dos records serían el contrato del mensaje que viajaría por la red.
 |---|---|
 | `RECEIVED_AT_CENTER` | `AT_DISTRIBUTION_CENTER` |
 | `DISPATCHED` | `IN_TRANSIT` |
-| `ARRIVED_AT_DESTINATION_CENTER` | `AT_DISTRIBUTION_CENTER` |
+| `ARRIVED_AT_DESTINATION_CENTER` | `AT_DESTINATION_CENTER` |
 | `OUT_FOR_DELIVERY` | `OUT_FOR_DELIVERY` |
 | `DELIVERED` | `DELIVERED` |
 
-El estado inicial de todo envío es `REGISTERED`.
+El estado inicial de todo envío es `REGISTERED`. Son seis estados para seis etapas: el
+centro de destino tiene el suyo aunque físicamente también sea "estar en un centro",
+porque mientras compartió `AT_DISTRIBUTION_CENTER` con el de origen, llegar a la ciudad
+de destino parecía un retroceso para cualquiera que dibujara el progreso desde el estado.
 
 ## Diagramas
 

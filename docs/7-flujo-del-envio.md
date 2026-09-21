@@ -10,15 +10,19 @@ REGISTERED
   └─ RECEIVED_AT_CENTER            (centro de la ciudad de ORIGEN)      → AT_DISTRIBUTION_CENTER
        └─ DISPATCHED               (centro donde está el paquete)       → IN_TRANSIT
             ├─ RECEIVED_AT_CENTER  (hub: cualquier ciudad menos destino)→ AT_DISTRIBUTION_CENTER
-            └─ ARRIVED_AT_DESTINATION_CENTER (ciudad de DESTINO)        → AT_DISTRIBUTION_CENTER
+            └─ ARRIVED_AT_DESTINATION_CENTER (ciudad de DESTINO)        → AT_DESTINATION_CENTER
                  └─ OUT_FOR_DELIVERY          (ciudad de DESTINO)       → OUT_FOR_DELIVERY
                       └─ DELIVERED            (ciudad de DESTINO)       → DELIVERED  (terminal)
 ```
 
-Las transiciones se definen sobre el **último movimiento**, no sobre el estado: el
-estado no distingue el centro de origen del de destino —los dos dejan el envío en
-`AT_DISTRIBUTION_CENTER`— pero desde el primero lo que sigue es despachar y desde el
-segundo, salir a reparto.
+Las transiciones se definen sobre el **último movimiento**, no sobre el estado. El
+movimiento es el dato primario —el estado se deriva de él— y apoyarse en el derivado
+obligaría a mantener las dos versiones de acuerdo.
+
+Son seis etapas y seis estados, uno por etapa. El centro de destino tiene estado propio
+(`AT_DESTINATION_CENTER`) aunque físicamente también sea "estar en un centro": mientras
+compartió `AT_DISTRIBUTION_CENTER` con el de origen, una interfaz que dibujara el
+progreso desde el estado mostraba la llegada a la ciudad de destino como un retroceso.
 
 El estado actual y la ubicación no se guardan en columnas propias: se derivan del
 historial de eventos, que ya es la fuente de la trazabilidad. Así no pueden
@@ -64,7 +68,7 @@ Lo que el operador puede hacer ahora. La interfaz lo pinta tal cual.
     {
       "tipo": "ARRIVED_AT_DESTINATION_CENTER",
       "etiqueta": "Llegada al centro destino",
-      "estadoResultante": "AT_DISTRIBUTION_CENTER",
+      "estadoResultante": "AT_DESTINATION_CENTER",
       "ciudadEsperada": "DESTINO",
       "ciudadDeLosCentros": { "id": 1, "nombre": "BOGOTÁ - CUNDINAMARCA" },
       "centros": [
