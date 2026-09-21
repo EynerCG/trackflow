@@ -47,6 +47,10 @@ public class LogisticsEvent {
     @Column(updatable = false)
     private String cityName;
 
+    /** Quien reparte. Solo tiene valor en eventos OUT_FOR_DELIVERY. */
+    @Column(updatable = false)
+    private String delivererName;
+
     /** Cuándo ocurrió el movimiento. Es la fecha que ve el cliente y la que ordena el historial. */
     @Column(nullable = false, updatable = false)
     private Instant occurredAt;
@@ -59,7 +63,7 @@ public class LogisticsEvent {
     }
 
     private LogisticsEvent(String eventId, String trackingNumber, EventType type, String point, String notes,
-            Long centerId, String cityName, Instant occurredAt, Instant registeredAt) {
+            Long centerId, String cityName, String delivererName, Instant occurredAt, Instant registeredAt) {
         this.eventId = eventId;
         this.trackingNumber = trackingNumber;
         this.type = type;
@@ -67,6 +71,7 @@ public class LogisticsEvent {
         this.notes = notes;
         this.centerId = centerId;
         this.cityName = cityName;
+        this.delivererName = delivererName;
         this.occurredAt = occurredAt;
         this.registeredAt = registeredAt;
     }
@@ -76,13 +81,14 @@ public class LogisticsEvent {
      * y no en el DTO porque el reporte llega por REST y también por la cola.
      */
     public static LogisticsEvent registrar(String eventId, String trackingNumber, EventType type, String point,
-            String notes, Long centerId, String cityName, Instant occurredAt, Instant registeredAt) {
+            String notes, Long centerId, String cityName, String delivererName, Instant occurredAt,
+            Instant registeredAt) {
         if (occurredAt == null || occurredAt.isAfter(registeredAt)) {
             throw new FechaDeMovimientoInvalidaException(occurredAt, registeredAt);
         }
 
-        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, centerId, cityName, occurredAt,
-                registeredAt);
+        return new LogisticsEvent(eventId, trackingNumber, type, point, notes, centerId, cityName, delivererName,
+                occurredAt, registeredAt);
     }
 
     public Long getId() {
@@ -115,6 +121,10 @@ public class LogisticsEvent {
 
     public String getCityName() {
         return cityName;
+    }
+
+    public String getDelivererName() {
+        return delivererName;
     }
 
     public Instant getOccurredAt() {

@@ -1,6 +1,7 @@
 package com.trackflow.modules.logistics.api.dto;
 
 import com.trackflow.modules.logistics.domain.EventType;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import java.time.Instant;
@@ -22,10 +23,21 @@ public record RegistrarEventoRequest(
         String observaciones,
 
         /**
+         * Nombre de quien reparte. Obligatorio solo cuando {@code tipo} es
+         * OUT_FOR_DELIVERY — para el resto de eventos no aplica y se ignora si llega.
+         */
+        String repartidorNombre,
+
+        /**
          * Cuándo ocurrió el movimiento. Opcional: si no se envía se asume que acaba de
          * ocurrir. Se reporta cuando el registro se sincroniza tarde, que es lo normal
          * si el lector de la bodega estuvo sin señal.
          */
         @PastOrPresent(message = "el movimiento no puede haber ocurrido en el futuro")
         Instant ocurridoEn) {
+
+    @AssertTrue(message = "el repartidor es obligatorio para un evento OUT_FOR_DELIVERY")
+    public boolean isRepartidorPresenteSiAplica() {
+        return tipo != EventType.OUT_FOR_DELIVERY || (repartidorNombre != null && !repartidorNombre.isBlank());
+    }
 }

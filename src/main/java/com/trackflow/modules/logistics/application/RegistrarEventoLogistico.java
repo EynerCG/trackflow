@@ -54,6 +54,7 @@ public class RegistrarEventoLogistico {
                 entrante.observaciones(),
                 entrante.centroId(),
                 entrante.ciudadNombre(),
+                entrante.repartidorNombre(),
                 entrante.ocurridoEn(),
                 now));
 

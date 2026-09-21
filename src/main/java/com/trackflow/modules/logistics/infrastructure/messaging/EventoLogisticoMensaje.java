@@ -16,6 +16,7 @@ public record EventoLogisticoMensaje(
         String punto,
         String ciudadNombre,
         String observaciones,
+        String repartidorNombre,
         Instant ocurridoEn) {
 
     public static EventoLogisticoMensaje from(EventoLogisticoEntrante evento) {
@@ -27,6 +28,7 @@ public record EventoLogisticoMensaje(
                 evento.punto(),
                 evento.ciudadNombre(),
                 evento.observaciones(),
+                evento.repartidorNombre(),
                 evento.ocurridoEn());
     }
 
@@ -39,6 +41,7 @@ public record EventoLogisticoMensaje(
                 punto,
                 ciudadNombre,
                 observaciones,
+                repartidorNombre,
                 ocurridoEn);
     }
 }

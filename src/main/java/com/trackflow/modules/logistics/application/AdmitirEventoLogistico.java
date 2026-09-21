@@ -37,7 +37,7 @@ public class AdmitirEventoLogistico {
      * reporta, se asume que el movimiento acaba de ocurrir.
      */
     public record Command(String trackingNumber, EventType tipo, Long centroId, String observaciones,
-            Instant ocurridoEn) {
+            String repartidorNombre, Instant ocurridoEn) {
     }
 
     private final TrackedShipmentRepository trackedShipments;
@@ -89,6 +89,7 @@ public class AdmitirEventoLogistico {
                 centro.getName(),
                 ciudadCentro.etiqueta(),
                 command.observaciones(),
+                command.repartidorNombre(),
                 ocurridoEn);
 
         publisher.publicar(evento);

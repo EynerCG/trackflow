@@ -12,6 +12,7 @@ public record EventoLogisticoResponse(
         String punto,
         String ciudadNombre,
         String observaciones,
+        String repartidorNombre,
         Instant ocurridoEn,
         Instant registradoEn) {
 
@@ -25,6 +26,7 @@ public record EventoLogisticoResponse(
                 event.getPoint(),
                 event.getCityName(),
                 event.getNotes(),
+                event.getDelivererName(),
                 event.getOccurredAt(),
                 event.getRegisteredAt());
     }

@@ -20,5 +20,6 @@ public record EventoLogisticoEntrante(
         String punto,
         String ciudadNombre,
         String observaciones,
+        String repartidorNombre,
         Instant ocurridoEn) {
 }

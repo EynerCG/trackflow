@@ -46,6 +46,7 @@ public class LogisticsEventController {
                 request.tipo(),
                 request.centroId(),
                 request.observaciones(),
+                request.repartidorNombre(),
                 request.ocurridoEn()));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(EventoAdmitidoResponse.from(evento));

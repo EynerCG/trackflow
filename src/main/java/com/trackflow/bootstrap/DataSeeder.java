@@ -96,7 +96,8 @@ public class DataSeeder implements ApplicationRunner {
         publicarEvento("seed-evt-004", ENTREGADO, EventType.DISPATCHED, centroOrigen, medellin, hace(33));
         publicarEvento("seed-evt-005", ENTREGADO, EventType.ARRIVED_AT_DESTINATION_CENTER, centroDestino, bogota,
                 hace(9));
-        publicarEvento("seed-evt-006", ENTREGADO, EventType.OUT_FOR_DELIVERY, centroDestino, bogota, hace(5));
+        publicarEvento("seed-evt-006", ENTREGADO, EventType.OUT_FOR_DELIVERY, centroDestino, bogota,
+                "Carlos Repartidor", hace(5));
         publicarEvento("seed-evt-007", ENTREGADO, EventType.DELIVERED, centroDestino, bogota, hace(2));
 
         log.info("Datos semilla encolados: {} (sin movimientos), {} (en tránsito), {} (entregado)",
@@ -149,9 +150,15 @@ public class DataSeeder implements ApplicationRunner {
     /** Resuelve el nombre y la ciudad del centro como lo haría AdmitirEventoLogistico. */
     private void publicarEvento(String eventId, String trackingNumber, EventType tipo, Centro centro,
             Ciudad ciudadCentro, Instant ocurridoEn) {
+        publicarEvento(eventId, trackingNumber, tipo, centro, ciudadCentro, null, ocurridoEn);
+    }
+
+    /** Variante con repartidor, para el único evento del seed que lo exige: OUT_FOR_DELIVERY. */
+    private void publicarEvento(String eventId, String trackingNumber, EventType tipo, Centro centro,
+            Ciudad ciudadCentro, String repartidorNombre, Instant ocurridoEn) {
         eventos.publicar(new EventoLogisticoEntrante(
                 eventId, trackingNumber, tipo, centro.getId(), centro.getName(), ciudadCentro.etiqueta(), null,
-                ocurridoEn));
+                repartidorNombre, ocurridoEn));
     }
 
     private boolean existe(String trackingNumber) {
