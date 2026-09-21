@@ -14,7 +14,14 @@ public record EstadoEnvioResponse(
         Instant registeredAt,
         boolean tieneMovimientos,
         String ultimoPunto,
-        Instant ultimoMovimientoAt) {
+        Instant ultimoMovimientoAt,
+
+        /**
+         * Dirección del destinatario. Solo viene informada cuando el envío ya está
+         * ENTREGADO — antes de eso el paquete no ha llegado ahí, así que mostrarla no
+         * tiene sentido; en cualquier otro estado este campo es null.
+         */
+        String direccionDestino) {
 
     public static EstadoEnvioResponse from(ShipmentTrackingView view) {
         return new EstadoEnvioResponse(
@@ -28,6 +35,10 @@ public record EstadoEnvioResponse(
                 view.getRegisteredAt(),
                 view.tieneMovimientos(),
                 view.getLastMovementPoint(),
-                view.getLastMovementAt());
+                view.getLastMovementAt(),
+                // Mismo literal que ShipmentStatus.DELIVERED.name() en shipments; no se puede
+                // importar el enum desde reports, así que se compara como texto — igual que ya
+                // hace EventType.resultingStatus() al cruzar el mismo límite entre módulos.
+                "DELIVERED".equals(view.getStatus()) ? view.getRecipientAddress() : null);
     }
 }

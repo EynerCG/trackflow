@@ -17,6 +17,7 @@ public record EnvioCreadoEvent(
         Long originCityId,
         String originCity,
         String recipientName,
+        String recipientAddress,
         Long destinationCityId,
         String destinationCity,
         Instant registeredAt,

@@ -49,6 +49,7 @@ public class RepublicarEnviosCreados {
                     ciudadOrigen.id(),
                     ciudadOrigen.etiqueta(),
                     shipment.getRecipient().getFullName(),
+                    shipment.getRecipient().getAddress(),
                     ciudadDestino.id(),
                     ciudadDestino.etiqueta(),
                     shipment.getRegisteredAt(),

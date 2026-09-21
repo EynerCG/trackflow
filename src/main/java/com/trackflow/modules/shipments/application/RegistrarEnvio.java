@@ -55,6 +55,7 @@ public class RegistrarEnvio {
                 solicitud.ciudadOrigen().id(),
                 solicitud.ciudadOrigen().etiqueta(),
                 saved.getRecipient().getFullName(),
+                saved.getRecipient().getAddress(),
                 solicitud.ciudadDestino().id(),
                 solicitud.ciudadDestino().etiqueta(),
                 saved.getRegisteredAt(),

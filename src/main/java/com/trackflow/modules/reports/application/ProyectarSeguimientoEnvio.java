@@ -25,6 +25,7 @@ public class ProyectarSeguimientoEnvio {
                 event.originCityId(),
                 event.originCity(),
                 event.recipientName(),
+                event.recipientAddress(),
                 event.destinationCityId(),
                 event.destinationCity(),
                 event.registeredAt()));
