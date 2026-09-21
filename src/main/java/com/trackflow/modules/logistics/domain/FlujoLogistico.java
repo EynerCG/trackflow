@@ -12,10 +12,12 @@ import java.util.Set;
  *
  * Hasta ahora no existía tal cosa — cualquier evento se aceptaba en cualquier orden,
  * y por eso un envío llegó a tener tres RECEIVED_AT_CENTER seguidos en ciudades
- * distintas. Las transiciones se definen sobre el último movimiento y no sobre el
- * estado, porque el estado no distingue el centro de origen del de destino: los dos
- * dejan el envío en AT_DISTRIBUTION_CENTER, pero desde el primero lo que sigue es
- * despachar y desde el segundo, salir a reparto.
+ * distintas.
+ *
+ * Las transiciones se definen sobre el último movimiento y no sobre el estado. Aunque
+ * hoy cada etapa ya tiene su propio estado, el movimiento es el dato primario: el
+ * estado se deriva de él, y apoyarse en el derivado obligaría a mantener las dos
+ * versiones de acuerdo.
  */
 public final class FlujoLogistico {
 
