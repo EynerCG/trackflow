@@ -15,6 +15,8 @@ import com.trackflow.shared.geografia.CatalogoDeCiudades;
 import com.trackflow.shared.geografia.Ciudad;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -67,39 +69,50 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
 
-        solicitarEnvio(SIN_MOVIMIENTOS, "Documentos legales");
-        solicitarEnvio(EN_TRANSITO, "Repuestos industriales");
-        solicitarEnvio(ENTREGADO, "Equipo médico");
+        solicitarEnvio(SIN_MOVIMIENTOS, "Documentos legales", hace(2));
+        solicitarEnvio(EN_TRANSITO, "Repuestos industriales", hace(10));
+        solicitarEnvio(ENTREGADO, "Equipo médico", hace(36));
 
         // Los eventos se rechazan si el envío aún no está registrado, así que hay que
         // esperar a que la cola de solicitudes termine de procesarse.
         esperarA(EN_TRANSITO);
         esperarA(ENTREGADO);
 
-        // El origen de los tres envíos semilla es Medellín (ver solicitarEnvio), así
-        // que el primer RECEIVED_AT_CENTER usa un centro real de esa ciudad — con el
-        // catálogo ya no tendría sentido decir "Cali" cuando el envío sale de
-        // Medellín, y con la regla de coherencia nueva directamente lo rechazaría.
+        // Los tres envíos semilla van de Medellín a Bogotá, así que los movimientos
+        // usan centros reales de esas dos ciudades y siguen el orden que exige
+        // FlujoLogistico: la semilla debe ser un recorrido que el propio sistema
+        // habría aceptado, no una secuencia cualquiera.
         Ciudad medellin = buscarCiudad("MEDELLÍN");
-        Centro centroNorteMedellin = buscarCentro("Centro Norte", medellin.id());
+        Ciudad bogota = buscarCiudad("BOGOTÁ");
+        Centro centroOrigen = buscarCentro("Centro Norte", medellin.id());
+        Centro centroDestino = buscarCentro("Centro Fontibón", bogota.id());
 
-        publicarEventoConCentro("seed-evt-001", EN_TRANSITO, EventType.RECEIVED_AT_CENTER, centroNorteMedellin,
-                medellin);
-        // DISPATCHED no tiene una regla de coherencia de ciudad ("en ruta" no es un
-        // lugar fijo del catálogo), así que se deja con el respaldo de texto libre a
-        // propósito: además demuestra que ese camino sigue funcionando.
-        publicarEventoConPunto("seed-evt-002", EN_TRANSITO, EventType.DISPATCHED, "Ruta Medellín - Bogotá");
+        // En tránsito: entró al centro de origen y salió hacia el destino.
+        publicarEvento("seed-evt-001", EN_TRANSITO, EventType.RECEIVED_AT_CENTER, centroOrigen, medellin, hace(9));
+        publicarEvento("seed-evt-002", EN_TRANSITO, EventType.DISPATCHED, centroOrigen, medellin, hace(8));
 
-        publicarEventoConCentro("seed-evt-003", ENTREGADO, EventType.RECEIVED_AT_CENTER, centroNorteMedellin,
-                medellin);
-        publicarEventoConPunto("seed-evt-004", ENTREGADO, EventType.OUT_FOR_DELIVERY, "Reparto Bogotá norte");
-        publicarEventoConPunto("seed-evt-005", ENTREGADO, EventType.DELIVERED, "Dirección del destinatario");
+        // Entregado: el recorrido completo, de punta a punta.
+        publicarEvento("seed-evt-003", ENTREGADO, EventType.RECEIVED_AT_CENTER, centroOrigen, medellin, hace(35));
+        publicarEvento("seed-evt-004", ENTREGADO, EventType.DISPATCHED, centroOrigen, medellin, hace(33));
+        publicarEvento("seed-evt-005", ENTREGADO, EventType.ARRIVED_AT_DESTINATION_CENTER, centroDestino, bogota,
+                hace(9));
+        publicarEvento("seed-evt-006", ENTREGADO, EventType.OUT_FOR_DELIVERY, centroDestino, bogota, hace(5));
+        publicarEvento("seed-evt-007", ENTREGADO, EventType.DELIVERED, centroDestino, bogota, hace(2));
 
         log.info("Datos semilla encolados: {} (sin movimientos), {} (en tránsito), {} (entregado)",
                 SIN_MOVIMIENTOS, EN_TRANSITO, ENTREGADO);
     }
 
-    private void solicitarEnvio(String trackingNumber, String descripcion) {
+    /**
+     * Los movimientos se escalonan en el pasado en vez de compartir el instante de
+     * arranque: el historial se ordena por fecha de ocurrencia, y con marcas
+     * idénticas no habría forma de saber cuál fue el último.
+     */
+    private Instant hace(int horas) {
+        return clock.instant().minus(horas, ChronoUnit.HOURS);
+    }
+
+    private void solicitarEnvio(String trackingNumber, String descripcion, Instant registradoEn) {
         // Se buscan por nombre y no por identificador fijo: los ids del catálogo los
         // asigna la migración y no son parte de su contrato.
         Ciudad origen = buscarCiudad("MEDELLÍN");
@@ -115,7 +128,7 @@ public class DataSeeder implements ApplicationRunner {
                 origen,
                 destino,
                 descripcion,
-                clock.instant()));
+                registradoEn));
     }
 
     private Ciudad buscarCiudad(String nombre) {
@@ -133,18 +146,12 @@ public class DataSeeder implements ApplicationRunner {
                                 .formatted(nombre, ciudadId)));
     }
 
-    /** Evento con centro del catálogo: resuelve el nombre y la ciudad como lo haría AdmitirEventoLogistico. */
-    private void publicarEventoConCentro(String eventId, String trackingNumber, EventType tipo, Centro centro,
-            Ciudad ciudadCentro) {
+    /** Resuelve el nombre y la ciudad del centro como lo haría AdmitirEventoLogistico. */
+    private void publicarEvento(String eventId, String trackingNumber, EventType tipo, Centro centro,
+            Ciudad ciudadCentro, Instant ocurridoEn) {
         eventos.publicar(new EventoLogisticoEntrante(
                 eventId, trackingNumber, tipo, centro.getId(), centro.getName(), ciudadCentro.etiqueta(), null,
-                clock.instant()));
-    }
-
-    /** Evento con el respaldo de texto libre, deprecado. */
-    private void publicarEventoConPunto(String eventId, String trackingNumber, EventType tipo, String punto) {
-        eventos.publicar(new EventoLogisticoEntrante(
-                eventId, trackingNumber, tipo, null, punto, null, null, clock.instant()));
+                ocurridoEn));
     }
 
     private boolean existe(String trackingNumber) {

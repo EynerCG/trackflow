@@ -3,8 +3,9 @@ package com.trackflow.modules.logistics.api;
 import com.trackflow.modules.logistics.domain.CentroFueraDeCiudadException;
 import com.trackflow.modules.logistics.domain.CentroInvalidoException;
 import com.trackflow.modules.logistics.domain.CentroNoEncontradoException;
-import com.trackflow.modules.logistics.domain.EntregaSinRepartoPrevioException;
+import com.trackflow.modules.logistics.domain.MovimientoFueraDeOrdenException;
 import com.trackflow.modules.logistics.domain.FechaDeMovimientoInvalidaException;
+import com.trackflow.modules.logistics.domain.TransicionInvalidaException;
 import com.trackflow.modules.logistics.domain.UnknownShipmentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -49,10 +50,17 @@ public class LogisticsExceptionHandler {
         return problema;
     }
 
-    @ExceptionHandler(EntregaSinRepartoPrevioException.class)
-    ProblemDetail entregaSinRepartoPrevio(EntregaSinRepartoPrevioException e) {
+    @ExceptionHandler(TransicionInvalidaException.class)
+    ProblemDetail transicionInvalida(TransicionInvalidaException e) {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
-        problema.setTitle("Entrega sin reparto previo");
+        problema.setTitle("Movimiento fuera del recorrido");
+        return problema;
+    }
+
+    @ExceptionHandler(MovimientoFueraDeOrdenException.class)
+    ProblemDetail movimientoFueraDeOrden(MovimientoFueraDeOrdenException e) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
+        problema.setTitle("Movimiento anterior al último registrado");
         return problema;
     }
 }

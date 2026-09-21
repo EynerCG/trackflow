@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * igual que haría cualquier punto de la cadena. Quien registra es el consumidor de la cola.
  */
 @RestController
-@RequestMapping("/api/shipments/{trackingNumber}/events")
+@RequestMapping("/api/shipments/{trackingNumber}")
 public class LogisticsEventController {
 
     private final AdmitirEventoLogistico admitirEventoLogistico;
@@ -34,21 +34,20 @@ public class LogisticsEventController {
         this.consultarHistorial = consultarHistorial;
     }
 
-    @PostMapping
+    @PostMapping("/events")
     public ResponseEntity<EventoAdmitidoResponse> admitir(@PathVariable String trackingNumber,
             @Valid @RequestBody RegistrarEventoRequest request) {
         EventoLogisticoEntrante evento = admitirEventoLogistico.ejecutar(new AdmitirEventoLogistico.Command(
                 trackingNumber,
                 request.tipo(),
                 request.centroId(),
-                request.punto(),
                 request.observaciones(),
                 request.ocurridoEn()));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(EventoAdmitidoResponse.from(evento));
     }
 
-    @GetMapping
+    @GetMapping("/events")
     public List<EventoLogisticoResponse> historial(@PathVariable String trackingNumber) {
         return consultarHistorial.ejecutar(trackingNumber).stream()
                 .map(EventoLogisticoResponse::from)

@@ -1,0 +1,79 @@
+package com.trackflow.modules.logistics.domain;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * El recorrido de un envío como máquina de estados: qué movimiento puede seguir a
+ * cuál, y en qué ciudad debe ocurrir cada uno.
+ *
+ * Hasta ahora no existía tal cosa — cualquier evento se aceptaba en cualquier orden,
+ * y por eso un envío llegó a tener tres RECEIVED_AT_CENTER seguidos en ciudades
+ * distintas. Las transiciones se definen sobre el último movimiento y no sobre el
+ * estado, porque el estado no distingue el centro de origen del de destino: los dos
+ * dejan el envío en AT_DISTRIBUTION_CENTER, pero desde el primero lo que sigue es
+ * despachar y desde el segundo, salir a reparto.
+ */
+public final class FlujoLogistico {
+
+    /**
+     * Estado de un envío que aún no tiene movimientos. Se escribe como texto y no
+     * como ShipmentStatus porque logistics no puede importar el módulo shipments;
+     * es el mismo criterio que ya usa EventType.resultingStatus().
+     */
+    public static final String ESTADO_REGISTRADO = "REGISTERED";
+
+    /** Lo único que puede pasarle a un envío recién registrado es entrar a un centro. */
+    private static final Set<EventType> DESDE_REGISTRADO = EnumSet.of(EventType.RECEIVED_AT_CENTER);
+
+    private static final Map<EventType, Set<EventType>> SIGUIENTES = new EnumMap<>(EventType.class);
+
+    static {
+        // De un centro solo se sale despachando.
+        SIGUIENTES.put(EventType.RECEIVED_AT_CENTER, EnumSet.of(EventType.DISPATCHED));
+        // En tránsito puede llegar al destino, o a un hub intermedio y seguir.
+        SIGUIENTES.put(EventType.DISPATCHED,
+                EnumSet.of(EventType.ARRIVED_AT_DESTINATION_CENTER, EventType.RECEIVED_AT_CENTER));
+        // Ya en la ciudad de destino, lo que sigue es repartir.
+        SIGUIENTES.put(EventType.ARRIVED_AT_DESTINATION_CENTER, EnumSet.of(EventType.OUT_FOR_DELIVERY));
+        SIGUIENTES.put(EventType.OUT_FOR_DELIVERY, EnumSet.of(EventType.DELIVERED));
+        // Entregado es terminal: el recorrido se acabó.
+        SIGUIENTES.put(EventType.DELIVERED, EnumSet.noneOf(EventType.class));
+    }
+
+    private FlujoLogistico() {
+    }
+
+    /**
+     * Movimientos admisibles a continuación. {@code ultimo} es null cuando el envío
+     * está registrado y todavía no se ha movido.
+     */
+    public static Set<EventType> siguientesPermitidos(EventType ultimo) {
+        return Collections.unmodifiableSet(ultimo == null ? DESDE_REGISTRADO : SIGUIENTES.get(ultimo));
+    }
+
+    public static boolean permite(EventType ultimo, EventType siguiente) {
+        return siguientesPermitidos(ultimo).contains(siguiente);
+    }
+
+    /** Estado en que queda el envío después de {@code ultimo}. */
+    public static String estadoTras(EventType ultimo) {
+        return ultimo == null ? ESTADO_REGISTRADO : ultimo.resultingStatus();
+    }
+
+    /**
+     * Ciudad en que debe estar el centro del movimiento. Depende del tipo y de si el
+     * envío ya se movió: el primer RECEIVED_AT_CENTER es la entrada al centro de
+     * origen, mientras que uno posterior solo puede ser un hub de paso.
+     */
+    public static CiudadEsperada ciudadEsperada(EventType tipo, EventType ultimo) {
+        return switch (tipo) {
+            case RECEIVED_AT_CENTER -> ultimo == null ? CiudadEsperada.ORIGEN : CiudadEsperada.HUB_INTERMEDIO;
+            case DISPATCHED -> CiudadEsperada.ACTUAL;
+            case ARRIVED_AT_DESTINATION_CENTER, OUT_FOR_DELIVERY, DELIVERED -> CiudadEsperada.DESTINO;
+        };
+    }
+}
