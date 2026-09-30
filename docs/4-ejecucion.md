@@ -67,6 +67,7 @@ $env:TRACKFLOW_DB_PASSWORD="contraseña"
 | `TRACKFLOW_ADMIN_CLAVE` | *(vacía)* | Su clave. Vacía deja `/api/admin/**` inaccesible |
 | `TRACKFLOW_JWT_SECRET` | *(generado)* | Secreto de firma, mínimo 32 caracteres |
 | `TRACKFLOW_TOKEN_MINUTOS` | `60` | Vigencia del token |
+| `TRACKFLOW_CORS_ORIGENES` | `http://localhost:5173,http://localhost:3000` | Frontends que pueden llamar a la API, separados por comas |
 
 ## Autenticación
 

@@ -22,6 +22,8 @@ public class SecurityProperties {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityProperties.class);
 
+    private static final SecureRandom ALEATORIO = new SecureRandom();
+
     public static final String ROL_OPERADOR = "OPERADOR";
     public static final String ROL_ADMIN = "ADMIN";
 
@@ -53,7 +55,7 @@ public class SecurityProperties {
 
     /**
      * Roles que corresponden a unas credenciales, o {@code null} si no son válidas.
-     * El administrador también es operador: puede hacer todo lo que hace este.
+     * El administrador también es operador: hereda sus permisos.
      */
     public String rolesDe(String usuario, String clave) {
         if (!esVacia(adminClave) && coincide(adminUsuario, usuario) && coincide(adminClave, clave)) {
@@ -81,7 +83,7 @@ public class SecurityProperties {
         }
 
         byte[] aleatorio = new byte[32];
-        new SecureRandom().nextBytes(aleatorio);
+        ALEATORIO.nextBytes(aleatorio);
         return Base64.getEncoder().encodeToString(aleatorio);
     }
 

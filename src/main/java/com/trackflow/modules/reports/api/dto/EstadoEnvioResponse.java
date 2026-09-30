@@ -5,23 +5,23 @@ import java.time.Instant;
 
 public record EstadoEnvioResponse(
         String trackingNumber,
-        String estado,
-        String remitenteNombre,
-        String ciudadOrigen,
-        String destinatarioNombre,
-        Long ciudadDestinoId,
-        String ciudadDestino,
+        String status,
+        String senderName,
+        String originCity,
+        String recipientName,
+        Long destinationCityId,
+        String destinationCity,
         Instant registeredAt,
-        boolean tieneMovimientos,
-        String ultimoPunto,
-        Instant ultimoMovimientoAt,
+        boolean hasMovements,
+        String lastMovementPoint,
+        Instant lastMovementAt,
 
         /**
          * Dirección del destinatario. Solo viene informada cuando el envío ya está
          * ENTREGADO — antes de eso el paquete no ha llegado ahí, así que mostrarla no
          * tiene sentido; en cualquier otro estado este campo es null.
          */
-        String direccionDestino) {
+        String recipientAddress) {
 
     public static EstadoEnvioResponse from(ShipmentTrackingView view) {
         return new EstadoEnvioResponse(

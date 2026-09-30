@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -31,14 +32,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) {
         boolean protegido = propiedades.proteccionActiva();
 
         http
                 // Sin esto, el filtro de seguridad rechaza las peticiones preflight antes de
                 // que se aplique la configuración CORS de Spring MVC (ver CorsConfig).
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
+                // CSRF explota que el navegador adjunta solo las cookies de sesión. Aquí no
+                // hay sesión ni cookies: el token viaja en la cabecera Authorization, que el
+                // navegador nunca añade por su cuenta, así que una página ajena no puede
+                // fabricar una petición autenticada. Por eso se desactiva sin riesgo.
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     // El OPTIONS de precomprobación nunca lleva token, por diseño del propio
